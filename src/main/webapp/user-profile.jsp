@@ -38,7 +38,7 @@
         User user = (User) session.getAttribute("loginUser");
         if (user != null) {
     %>
-    <img src="<%= user.getAvatarUrl() %>" alt="User Avatar" class="user-avatar">
+    <img src="<%= user.getProfilePicture() %>" alt="User Avatar" class="user-avatar">
     <form class="layui-form" action="updateProfile" method="post">
         <div class="layui-form-item">
             <label class="layui-form-label">用户名</label>
