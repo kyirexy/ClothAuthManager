@@ -122,6 +122,18 @@
         .menu-item a:hover {
             color: #009688;
         }
+        .layui-layer-page .layui-layer-content {
+            overflow: visible !important;
+        }
+        .layui-tab {
+            margin: 0;
+        }
+        .layui-form {
+            padding: 20px;
+        }
+        .layui-form-item:last-child {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
@@ -132,16 +144,22 @@
             User loginUser = (User) session.getAttribute("loginUser");
             if (loginUser != null) {
         %>
-        <img src="<%= loginUser.getProfilePicture() %>" alt="User Avatar" class="user-avatar" id="userAvatar" onerror="this.src='static/images/smail.jpg'">
-        <div class="user-menu" id="userMenu" style="display: none;">
-            <div class="menu-item">
-                <span>欢迎，<%= loginUser.getUsername() %></span>
-            </div>
-            <div class="menu-item">
-                <a href="user-profile.jsp">个人信息</a>
-            </div>
-            <div class="menu-item">
-                <a href="logout">退出登录</a>
+        <div class="user-info">
+            <img src="<%= loginUser.getProfilePicture() %>" 
+                 alt="User Avatar" 
+                 class="user-avatar" 
+                 id="userAvatar" 
+                 onerror="this.src='static/images/smail.jpg'">
+            <div class="user-menu" id="userMenu" style="display: none;">
+                <div class="menu-item">
+                    <span>欢迎，<%= loginUser.getUsername() %></span>
+                </div>
+                <div class="menu-item">
+                    <a href="user-profile.jsp">个人信息</a>
+                </div>
+                <div class="menu-item">
+                    <a href="logout">退出登录</a>
+                </div>
             </div>
         </div>
         <%
@@ -169,7 +187,7 @@
 </main>
 
 <!-- 登录注册弹窗 -->
-<div id="sign" style="display: none;">
+<div id="sign" style="display: none; padding: 20px;">
     <div class="layui-tab layui-tab-brief" lay-filter="user-tab">
         <ul class="layui-tab-title">
             <li class="layui-this">登录</li>
@@ -255,94 +273,89 @@
 </div>
 
 <script>
-    layui.use(['layer', 'form', 'element'], function(){
-        var layer = layui.layer,
-            form = layui.form,
-            element = layui.element,
-            $ = layui.jquery;
+// 确保只初始化一次
+var initialized = false;
 
-        console.log('layui 初始化完成');
+layui.use(['layer', 'form', 'element'], function(){
+    if (initialized) return;
+    initialized = true;
 
-        // 登录按钮点击事件
-        $('#loginBtn').on('click', function(){
-            console.log('登录按钮被点击');
-            
-            // 打开弹窗
-            layer.open({
-                type: 1,
-                title: '登录/注册',
-                area: ['360px', 'auto'],
-                content: $('#sign'),
-                shadeClose: true,
-                closeBtn: 1,
-                shade: 0.3,
-                offset: '100px',
-                success: function(layero, index){
-                    console.log('弹窗打开成功');
-                    form.render(); // 重新渲染表单
+    var layer = layui.layer,
+        form = layui.form,
+        element = layui.element,
+        $ = layui.jquery;
+
+    console.log('layui 初始化完成');
+
+    // 登录按钮点击事件
+    $('#loginBtn').on('click', function(){
+        console.log('登录按钮被点击');
+        
+        // 打开弹窗
+        var index = layer.open({
+            type: 1,
+            title: '登录/注册',
+            area: ['360px', 'auto'],
+            content: $('#sign'),
+            shadeClose: true,
+            closeBtn: 1,
+            shade: false,
+            offset: '100px',
+            success: function(layero, index){
+                console.log('弹窗打开成功');
+                
+                // 登录表单提交
+                form.on('submit(login)', function(data){
+                    console.log('提交登录表单', data.field);
+                    // 添加表单验证
+                    if(!data.field.username || !data.field.password) {
+                        layer.msg('用户名和密码不能为空', {icon: 2});
+                        return false;
+                    }
                     
-                    // 登录表单提交
-                    form.on('submit(login)', function(data){
-                        console.log('提交登录表单', data.field);
-                        $.ajax({
-                            url: 'login',
-                            type: 'POST',
-                            data: data.field,
-                            success: function(res){
-                                try {
-                                    if(res.code === 0){
-                                        layer.msg('登录成功', {icon: 1});
-                                        setTimeout(function(){
+                    $.ajax({
+                        url: 'login',
+                        type: 'POST',
+                        data: data.field,
+                        success: function(res){
+                            try {
+                                console.log('登录响应:', res);
+                                if(res.code === 0){
+                                    layer.msg('登录成功', {
+                                        icon: 1,
+                                        time: 1000,
+                                        end: function(){
                                             window.location.reload();
-                                        }, 1000);
-                                    } else {
-                                        layer.msg(res.msg || '登录失败', {icon: 2});
-                                    }
-                                } catch(e) {
-                                    console.error('处理响应时出错:', e);
-                                    layer.msg('系统错误，请稍后重试', {icon: 2});
+                                        }
+                                    });
+                                } else {
+                                    layer.msg(res.msg || '登录失败', {icon: 2});
                                 }
-                            },
-                            error: function(xhr, status, error){
-                                console.error('Ajax请求失败:', error);
-                                layer.msg('网络错误，请稍后重试', {icon: 2});
+                            } catch(e) {
+                                console.error('处理响应时出错:', e);
+                                layer.msg('系统错误，请稍后重试', {icon: 2});
                             }
-                        });
-                        return false;
+                        },
+                        error: function(xhr, status, error){
+                            console.error('Ajax请求失败:', error);
+                            layer.msg('网络错误，请稍后重试', {icon: 2});
+                        }
                     });
-                    
-                    // 注册表单提交
-                    form.on('submit(register)', function(data){
-                        console.log('提交注册表单', data.field);
-                        $.ajax({
-                            url: 'register',
-                            type: 'POST',
-                            data: data.field,
-                            success: function(res){
-                                try {
-                                    if(res.code === 0){
-                                        layer.msg('注册成功', {icon: 1});
-                                        // 切换到登录标签
-                                        element.tabChange('user-tab', 0);
-                                    } else {
-                                        layer.msg(res.msg || '注册失败', {icon: 2});
-                                    }
-                                } catch(e) {
-                                    console.error('处理响应时出错:', e);
-                                    layer.msg('系统错误，请稍后重试', {icon: 2});
-                                }
-                            },
-                            error: function(xhr, status, error){
-                                console.error('Ajax请求失败:', error);
-                                layer.msg('网络错误，请稍后重试', {icon: 2});
-                            }
-                        });
-                        return false;
-                    });
-                }
-            });
+                    return false;
+                });
+
+                // 重新渲染表单
+                form.render();
+            }
         });
     });
+});
+
+// 防止重复初始化
+$(function(){
+    if (window.loginInitialized) return;
+    window.loginInitialized = true;
+});
 </script>
 
 <!-- 添加表单验证 -->
