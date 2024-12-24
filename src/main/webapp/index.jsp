@@ -216,6 +216,12 @@
                     </div>
                     <div class="layui-form-item">
                         <div class="layui-input-block" style="margin-left: 0;">
+                            <input type="radio" name="role" value="user" title="用户" checked>
+                            <input type="radio" name="role" value="admin" title="管理员">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block" style="margin-left: 0;">
                             <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="login">登录</button>
                         </div>
                     </div>
@@ -309,21 +315,39 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
         // 显示加载中
         var loadIndex = layer.load(1);
         
+        // 确保获取到角色值
+        var role = $('input[name="role"]:checked').val();
+        console.log('选择的角色:', role);
+        
+        // 构建请求数据
+        var requestData = {
+            username: data.field.username,
+            password: data.field.password,
+            role: role || 'user'  // 如果没有选择角色，默认为用户
+        };
+        
+        console.log('发送的请求数据:', requestData);
+        
         $.ajax({
             url: 'login',
             type: 'POST',
-            data: data.field,
+            data: requestData,
             dataType: 'json',
             success: function(res){
                 layer.close(loadIndex);
                 console.log('登录响应:', res);
                 
                 if(res.code === 0){
-                    layer.msg('登录成功', {
+                    layer.msg(res.msg, {
                         icon: 1,
                         time: 1500
                     }, function(){
-                        window.location.reload();
+                        // 根据角色跳转到不同页面
+                        if(res.role === 'admin'){
+                            window.location.href = 'admin-dashboard.jsp';
+                        } else {
+                            window.location.reload();
+                        }
                     });
                 } else {
                     layer.msg(res.msg || '登录失败，请检查用户名和密码', {icon: 2});
@@ -354,7 +378,6 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
             return false;
         }
         
-        // 显示加载中
         var loadIndex = layer.load(1);
         
         $.ajax({
@@ -367,14 +390,33 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
                 console.log('注册响应:', res);
                 
                 if(res.code === 0){
-                    layer.msg('注册成功', {
-                        icon: 1,
-                        time: 1500
-                    }, function(){
-                        // 清空表单
-                        $('form[lay-filter="registerForm"]')[0].reset();
-                        // 切换到登录标签
-                        element.tabChange('user-tab', 0);
+                    // 注册成功后自动登录
+                    $.ajax({
+                        url: 'login',
+                        type: 'POST',
+                        data: {
+                            username: data.field.username,
+                            password: data.field.password,
+                            role: 'user'
+                        },
+                        dataType: 'json',
+                        success: function(loginRes){
+                            if(loginRes.code === 0){
+                                layer.msg('注册成功并已自动登录', {
+                                    icon: 1,
+                                    time: 1500
+                                }, function(){
+                                    window.location.reload();
+                                });
+                            } else {
+                                layer.msg('注册成功，请手动登录', {icon: 1});
+                                element.tabChange('user-tab', 0);
+                            }
+                        },
+                        error: function(){
+                            layer.msg('注册成功，请手动登录', {icon: 1});
+                            element.tabChange('user-tab', 0);
+                        }
                     });
                 } else {
                     layer.msg(res.msg || '注册失败，请重试', {icon: 2});
