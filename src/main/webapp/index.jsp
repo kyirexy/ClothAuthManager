@@ -310,52 +310,37 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
 
     // 监听登录提交
     form.on('submit(login)', function(data){
-        console.log('登录表单提交', data.field);
-        
-        // 显示加载中
         var loadIndex = layer.load(1);
-        
-        // 确保获取到角色值
-        var role = $('input[name="role"]:checked').val();
-        console.log('选择的角色:', role);
-        
-        // 构建请求数据
-        var requestData = {
-            username: data.field.username,
-            password: data.field.password,
-            role: role || 'user'  // 如果没有选择角色，默认为用户
-        };
-        
-        console.log('发送的请求数据:', requestData);
         
         $.ajax({
             url: 'login',
             type: 'POST',
-            data: requestData,
+            data: data.field,
             dataType: 'json',
             success: function(res){
                 layer.close(loadIndex);
-                console.log('登录响应:', res);
                 
                 if(res.code === 0){
                     layer.msg(res.msg, {
                         icon: 1,
                         time: 1500
                     }, function(){
-                        // 根据角色跳转到不同页面
                         if(res.role === 'admin'){
-                            window.location.href = 'admin-dashboard.jsp';
+                            console.log('准备跳转到管理员页面');
+                            // 添加一个小延迟，确保session已经完全设置
+                            setTimeout(function() {
+                                window.location.href = 'admin-dashboard.jsp';
+                            }, 100);
                         } else {
                             window.location.reload();
                         }
                     });
                 } else {
-                    layer.msg(res.msg || '登录失败，请检查用户名和密码', {icon: 2});
+                    layer.msg(res.msg, {icon: 2});
                 }
             },
-            error: function(xhr, status, error){
+            error: function(){
                 layer.close(loadIndex);
-                console.error('登录请求失败:', error);
                 layer.msg('服务器错误，请稍后重试', {icon: 2});
             }
         });

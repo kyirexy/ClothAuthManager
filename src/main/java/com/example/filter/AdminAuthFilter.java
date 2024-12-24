@@ -15,15 +15,23 @@ public class AdminAuthFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-        HttpSession session = httpRequest.getSession();
-        
-        // 检查是否是管理员登录
-        if (session.getAttribute("loginAdmin") == null || 
-            !"admin".equals(session.getAttribute("userRole"))) {
+        HttpSession session = httpRequest.getSession(false);
+
+        if (session == null || session.getAttribute("loginAdmin") == null) {
             httpResponse.sendRedirect(httpRequest.getContextPath() + "/index.jsp");
             return;
         }
-        
+
         chain.doFilter(request, response);
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // 初始化代码
+    }
+
+    @Override
+    public void destroy() {
+        // 清理代码
     }
 } 
