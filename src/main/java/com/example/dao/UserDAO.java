@@ -69,4 +69,32 @@ public class UserDAO {
         }
         return false;
     }
-} 
+
+    public boolean updateUser(User user) {
+        String sql = "UPDATE user SET " +
+                    "email = ?, " +
+                    "phone = ?, " +
+                    "gender = ?, " +
+                    "last_login = CURRENT_TIMESTAMP " +
+                    "WHERE id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, user.getEmail());
+            pstmt.setString(2, user.getPhone());
+            pstmt.setString(3, user.getGender());
+            pstmt.setInt(4, user.getId());
+            
+            int rows = pstmt.executeUpdate();
+            return rows > 0;
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+}

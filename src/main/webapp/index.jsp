@@ -261,17 +261,6 @@
     </div>
 </div>
 
-<!-- 在用户信息部分添加头像上传功能 -->
-<div class="layui-upload">
-    <button type="button" class="layui-btn" id="uploadAvatar">
-        <i class="layui-icon">&#xe67c;</i>上传头像
-    </button>
-    <div class="layui-upload-list">
-        <img class="layui-upload-img" id="previewImg" src="${loginUser.profilePicture}">
-        <p id="uploadText"></p>
-    </div>
-</div>
-
 <script>
 // 确保只初始化一次
 var initialized = false;

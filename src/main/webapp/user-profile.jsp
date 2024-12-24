@@ -107,6 +107,14 @@
                                placeholder="请输入邮箱" class="layui-input">
                     </div>
                 </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">性别</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="gender" value="M" title="男" <%= "M".equals(user.getGender()) ? "checked" : "" %>>
+                        <input type="radio" name="gender" value="F" title="女" <%= "F".equals(user.getGender()) ? "checked" : "" %>>
+                    </div>
+                </div>
             </div>
 
             <div class="info-section">
