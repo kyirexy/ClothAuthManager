@@ -124,15 +124,20 @@
         }
         .layui-layer-page .layui-layer-content {
             overflow: visible !important;
+            background-color: #fff;
         }
         .layui-tab {
             margin: 0;
+            background-color: #fff;
         }
         .layui-form {
             padding: 20px;
         }
         .layui-form-item:last-child {
             margin-bottom: 0;
+        }
+        #sign {
+            background-color: #fff;
         }
     </style>
 </head>
@@ -199,13 +204,13 @@
                 <form class="layui-form" lay-filter="loginForm">
                     <div class="layui-form-item">
                         <div class="layui-input-block" style="margin-left: 0;">
-                            <input type="text" name="username" required lay-verify="required" 
+                            <input type="text" name="username" required lay-verify="required"
                                    placeholder="用户名/邮箱/手机号" autocomplete="off" class="layui-input">
                         </div>
                     </div>
                     <div class="layui-form-item">
                         <div class="layui-input-block" style="margin-left: 0;">
-                            <input type="password" name="password" required lay-verify="required" 
+                            <input type="password" name="password" required lay-verify="required"
                                    placeholder="密码" autocomplete="off" class="layui-input">
                         </div>
                     </div>
@@ -216,37 +221,37 @@
                     </div>
                 </form>
             </div>
-            
+
             <!-- 注册表单 -->
             <div class="layui-tab-item">
                 <form class="layui-form" lay-filter="registerForm">
                     <div class="layui-form-item">
                         <div class="layui-input-block" style="margin-left: 0;">
-                            <input type="text" name="username" required lay-verify="required" 
+                            <input type="text" name="username" required lay-verify="required"
                                    placeholder="请设置用户名" autocomplete="off" class="layui-input">
                         </div>
                     </div>
                     <div class="layui-form-item">
                         <div class="layui-input-block" style="margin-left: 0;">
-                            <input type="password" name="password" required lay-verify="required|pass" 
+                            <input type="password" name="password" required lay-verify="required|pass"
                                    placeholder="请设置密码" autocomplete="off" class="layui-input">
                         </div>
                     </div>
                     <div class="layui-form-item">
                         <div class="layui-input-block" style="margin-left: 0;">
-                            <input type="password" name="repassword" required lay-verify="required|repass" 
+                            <input type="password" name="repassword" required lay-verify="required|repass"
                                    placeholder="请确认密码" autocomplete="off" class="layui-input">
                         </div>
                     </div>
                     <div class="layui-form-item">
                         <div class="layui-input-block" style="margin-left: 0;">
-                            <input type="text" name="email" required lay-verify="required|email" 
+                            <input type="text" name="email" required lay-verify="required|email"
                                    placeholder="请输入邮箱" autocomplete="off" class="layui-input">
                         </div>
                     </div>
                     <div class="layui-form-item">
                         <div class="layui-input-block" style="margin-left: 0;">
-                            <input type="text" name="phone" required lay-verify="required|phone" 
+                            <input type="text" name="phone" required lay-verify="required|phone"
                                    placeholder="请输入手机号" autocomplete="off" class="layui-input">
                         </div>
                     </div>
@@ -261,18 +266,14 @@
     </div>
 </div>
 
+
 <script>
-// 确保只初始化一次
-var initialized = false;
-
-layui.use(['layer', 'form', 'element'], function(){
-    if (initialized) return;
-    initialized = true;
-
+// 将所有的初始化逻辑放在一个统一的初始化函数中
+layui.use(['layer', 'form', 'element', 'jquery'], function(){
     var layer = layui.layer,
         form = layui.form,
         element = layui.element,
-        $ = layui.jquery;
+        $ = layui.jquery;  // 确保使用 layui 的 jQuery
 
     console.log('layui 初始化完成');
 
@@ -281,227 +282,114 @@ layui.use(['layer', 'form', 'element'], function(){
         console.log('登录按钮被点击');
         
         // 打开弹窗
-        var index = layer.open({
+        layer.open({
             type: 1,
             title: '登录/注册',
             area: ['360px', 'auto'],
             content: $('#sign'),
             shadeClose: true,
             closeBtn: 1,
-            shade: false,
+            shade: 0.3,
             offset: '100px',
             success: function(layero, index){
-                console.log('弹窗打开成功');
+                // 重置表单
+                $('form[lay-filter="loginForm"]')[0].reset();
+                $('form[lay-filter="registerForm"]')[0].reset();
                 
-                // 登录表单提交
-                form.on('submit(login)', function(data){
-                    console.log('提交登录表单', data.field);
-                    // 添加表单验证
-                    if(!data.field.username || !data.field.password) {
-                        layer.msg('用户名和密码不能为空', {icon: 2});
-                        return false;
-                    }
-                    
-                    $.ajax({
-                        url: 'login',
-                        type: 'POST',
-                        data: data.field,
-                        success: function(res){
-                            try {
-                                console.log('登录响应:', res);
-                                if(res.code === 0){
-                                    layer.msg('登录成功', {
-                                        icon: 1,
-                                        time: 1000,
-                                        end: function(){
-                                            window.location.reload();
-                                        }
-                                    });
-                                } else {
-                                    layer.msg(res.msg || '登录失败', {icon: 2});
-                                }
-                            } catch(e) {
-                                console.error('处理响应时出错:', e);
-                                layer.msg('系统错误，请稍后重试', {icon: 2});
-                            }
-                        },
-                        error: function(xhr, status, error){
-                            console.error('Ajax请求失败:', error);
-                            layer.msg('网络错误，请稍后重试', {icon: 2});
-                        }
-                    });
-                    return false;
-                });
-
                 // 重新渲染表单
                 form.render();
             }
         });
     });
-});
 
-// 防止重复初始化
-$(function(){
-    if (window.loginInitialized) return;
-    window.loginInitialized = true;
-});
-</script>
-
-<!-- 添加表单验证 -->
-<script>
-layui.use(['form', 'layer'], function(){
-    var form = layui.form;
-    var layer = layui.layer;
-    
-    // 自定义验证规则
-    form.verify({
-        pass: [
-            /^[\S]{6,12}$/,
-            '密码必须6到12位，且不能出现空格'
-        ],
-        repass: function(value) {
-            var password = $('input[name=password]').val();
-            if(value !== password) {
-                return '两次密码输入不一致！';
-            }
-        }
-    });
-    
     // 监听登录提交
     form.on('submit(login)', function(data){
+        console.log('登录表单提交', data.field);
+        
+        // 显示加载中
+        var loadIndex = layer.load(1);
+        
         $.ajax({
             url: 'login',
             type: 'POST',
             data: data.field,
+            dataType: 'json',
             success: function(res){
+                layer.close(loadIndex);
+                console.log('登录响应:', res);
+                
                 if(res.code === 0){
-                    layer.msg('登录成功', {icon: 1});
-                    setTimeout(function(){
+                    layer.msg('登录成功', {
+                        icon: 1,
+                        time: 1500
+                    }, function(){
                         window.location.reload();
-                    }, 1000);
+                    });
                 } else {
-                    layer.msg(res.msg || '登录失败', {icon: 2});
+                    layer.msg(res.msg || '登录失败，请检查用户名和密码', {icon: 2});
                 }
             },
-            error: function(){
+            error: function(xhr, status, error){
+                layer.close(loadIndex);
+                console.error('登录请求失败:', error);
                 layer.msg('服务器错误，请稍后重试', {icon: 2});
             }
         });
         return false;
     });
-    
+
     // 监听注册提交
     form.on('submit(register)', function(data){
+        console.log('注册表单提交', data.field);
+        
+        // 表单验证
+        if(!data.field.username || !data.field.password || !data.field.repassword || 
+           !data.field.email || !data.field.phone) {
+            layer.msg('请填写完整注册信息', {icon: 2});
+            return false;
+        }
+        
+        if(data.field.password !== data.field.repassword) {
+            layer.msg('两次密码输入不一致', {icon: 2});
+            return false;
+        }
+        
+        // 显示加载中
+        var loadIndex = layer.load(1);
+        
         $.ajax({
             url: 'register',
             type: 'POST',
             data: data.field,
+            dataType: 'json',
             success: function(res){
+                layer.close(loadIndex);
+                console.log('注册响应:', res);
+                
                 if(res.code === 0){
-                    layer.msg('注册成功', {icon: 1});
-                    // 切换到登录标签
-                    $('.layui-tab-title li:first').click();
+                    layer.msg('注册成功', {
+                        icon: 1,
+                        time: 1500
+                    }, function(){
+                        // 清空表单
+                        $('form[lay-filter="registerForm"]')[0].reset();
+                        // 切换到登录标签
+                        element.tabChange('user-tab', 0);
+                    });
                 } else {
-                    layer.msg(res.msg || '注册失败', {icon: 2});
+                    layer.msg(res.msg || '注册失败，请重试', {icon: 2});
                 }
             },
-            error: function(){
+            error: function(xhr, status, error){
+                layer.close(loadIndex);
+                console.error('注册请求失败:', error);
                 layer.msg('服务器错误，请稍后重试', {icon: 2});
             }
         });
         return false;
     });
-});
-</script>
 
-<!-- 在页面底部添加脚本，注意要放在 body 标签结束前 -->
-<script>
-layui.use(['layer', 'form', 'element', 'jquery'], function(){
-    var $ = layui.jquery,
-        layer = layui.layer,
-        form = layui.form,
-        element = layui.element;
-    
-    console.log('layui 初始化完成');
-
-    // 绑定登录按钮点击事件
-    $('#loginBtn').on('click', function(){
-        console.log('登录按钮被点击');
-        
-        layer.open({
-            type: 1,
-            title: '登录/注册',
-            area: ['360px', 'auto'],
-            content: $('#sign'),
-            shadeClose: true,  // 点击遮罩关闭
-            shade: 0.6,        // 遮罩透明度
-            closeBtn: 1,       // 显示关闭按钮
-            anim: 1,          // 动画效果
-            success: function(layero, index){
-                console.log('弹窗打开成功');
-                
-                // 重新渲染表单
-                form.render();
-                
-                // 绑定登录表单提交事件
-                form.on('submit(login)', function(data){
-                    console.log('登录表单提交', data.field);
-                    $.ajax({
-                        url: 'login',
-                        type: 'POST',
-                        data: data.field,
-                        success: function(res){
-                            if(res.code === 0){
-                                layer.msg('登录成功', {icon: 1});
-                                setTimeout(function(){
-                                    window.location.reload();
-                                }, 1000);
-                            } else {
-                                layer.msg(res.msg || '登录失败', {icon: 2});
-                            }
-                        },
-                        error: function(){
-                            layer.msg('服务器错误，请稍后重试', {icon: 2});
-                        }
-                    });
-                    return false;
-                });
-
-                // 绑定注册表单提交事件
-                form.on('submit(register)', function(data){
-                    console.log('注册表单提交', data.field);
-                    $.ajax({
-                        url: 'register',
-                        type: 'POST',
-                        data: data.field,
-                        success: function(res){
-                            if(res.code === 0){
-                                layer.msg('注册成功', {icon: 1});
-                                // 切换到登录标签
-                                element.tabChange('user-tab', '1');
-                            } else {
-                                layer.msg(res.msg || '注册失败', {icon: 2});
-                            }
-                        },
-                        error: function(){
-                            layer.msg('服务器错误，请稍后重试', {icon: 2});
-                        }
-                    });
-                    return false;
-                });
-            }
-        });
-    });
-});
-</script>
-
-<script>
-layui.use(['jquery'], function(){
-    var $ = layui.jquery;
-    
-    console.log('初始化头像菜单交互');
-    
-    // 头像点击事件
+    // 头像菜单交互
     $('#userAvatar').on('click', function(e){
         e.stopPropagation();
         console.log('头像被点击');
