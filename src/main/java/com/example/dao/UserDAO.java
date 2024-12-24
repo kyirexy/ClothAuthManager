@@ -8,7 +8,7 @@ import java.sql.*;
 public class UserDAO {
     
     // 默认头像路径
-    private static final String DEFAULT_AVATAR = "static/images/img.png";
+    private static final String DEFAULT_AVATAR = "static/images/smail.jpg";
     
     public User login(String username, String password) {
         String sql = "SELECT * FROM user WHERE (username = ? OR email = ? OR phone = ?) AND password = ?";

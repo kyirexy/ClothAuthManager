@@ -6,8 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>时尚服装购物网站</title>
-    <link rel="stylesheet" href="static/layui/css/layui.css"/>
-    <script src="static/layui/layui.js"></script>
+    <link rel="stylesheet" href="static/common/layui/css/layui.css"/>
+    <script src="static/common/layui/layui.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -84,6 +84,44 @@
         .user-menu a:hover {
             background-color: #f2f2f2;
         }
+        .user-info {
+            position: relative;
+            display: inline-block;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+            border: 2px solid #fff;
+        }
+        .user-menu {
+            position: absolute;
+            right: 0;
+            top: 45px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 120px;
+        }
+        .menu-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-item a {
+            color: #333;
+            text-decoration: none;
+            display: block;
+        }
+        .menu-item a:hover {
+            color: #009688;
+        }
     </style>
 </head>
 <body>
@@ -94,10 +132,17 @@
             User loginUser = (User) session.getAttribute("loginUser");
             if (loginUser != null) {
         %>
-        <img src="<%= loginUser.getProfilePicture() %>" alt="User Avatar" class="user-avatar" id="userAvatar">
-        <div class="user-menu" id="userMenu">
-            <a href="user-profile.jsp">查看个人信息</a>
-            <a href="logout">退出登录</a>
+        <img src="<%= loginUser.getProfilePicture() %>" alt="User Avatar" class="user-avatar" id="userAvatar" onerror="this.src='static/images/smail.jpg'">
+        <div class="user-menu" id="userMenu" style="display: none;">
+            <div class="menu-item">
+                <span>欢迎，<%= loginUser.getUsername() %></span>
+            </div>
+            <div class="menu-item">
+                <a href="user-profile.jsp">个人信息</a>
+            </div>
+            <div class="menu-item">
+                <a href="logout">退出登录</a>
+            </div>
         </div>
         <%
         } else {
@@ -124,13 +169,13 @@
 </main>
 
 <!-- 登录注册弹窗 -->
-<div id="sign" style="display: none; padding: 20px;">
+<div id="sign" style="display: none;">
     <div class="layui-tab layui-tab-brief" lay-filter="user-tab">
         <ul class="layui-tab-title">
             <li class="layui-this">登录</li>
             <li>注册</li>
         </ul>
-        <div class="layui-tab-content" style="padding: 20px 0;">
+        <div class="layui-tab-content">
             <!-- 登录表单 -->
             <div class="layui-tab-item layui-show">
                 <form class="layui-form" lay-filter="loginForm">
@@ -210,77 +255,92 @@
 </div>
 
 <script>
-    layui.use(['element', 'layer', 'form', 'upload'], function() {
-        var element = layui.element,
-            $ = layui.jquery,
-            layer = layui.layer,
+    layui.use(['layer', 'form', 'element'], function(){
+        var layer = layui.layer,
             form = layui.form,
-            upload = layui.upload;
+            element = layui.element,
+            $ = layui.jquery;
 
-        var layer_index;
+        console.log('layui 初始化完成');
 
-        $('#loginBtn').on('click', function() {
-            layer_index = layer.open({
+        // 登录按钮点击事件
+        $('#loginBtn').on('click', function(){
+            console.log('登录按钮被点击');
+            
+            // 打开弹窗
+            layer.open({
                 type: 1,
-                title: false,
-                closeBtn: 1,
+                title: '登录/注册',
                 area: ['360px', 'auto'],
                 content: $('#sign'),
                 shadeClose: true,
-                success: function() {
-                    form.render();
+                closeBtn: 1,
+                shade: 0.3,
+                offset: '100px',
+                success: function(layero, index){
+                    console.log('弹窗打开成功');
+                    form.render(); // 重新渲染表单
+                    
+                    // 登录表单提交
+                    form.on('submit(login)', function(data){
+                        console.log('提交登录表单', data.field);
+                        $.ajax({
+                            url: 'login',
+                            type: 'POST',
+                            data: data.field,
+                            success: function(res){
+                                try {
+                                    if(res.code === 0){
+                                        layer.msg('登录成功', {icon: 1});
+                                        setTimeout(function(){
+                                            window.location.reload();
+                                        }, 1000);
+                                    } else {
+                                        layer.msg(res.msg || '登录失败', {icon: 2});
+                                    }
+                                } catch(e) {
+                                    console.error('处理响应时出错:', e);
+                                    layer.msg('系统错误，请稍后重试', {icon: 2});
+                                }
+                            },
+                            error: function(xhr, status, error){
+                                console.error('Ajax请求失败:', error);
+                                layer.msg('网络错误，请稍后重试', {icon: 2});
+                            }
+                        });
+                        return false;
+                    });
+                    
+                    // 注册表单提交
+                    form.on('submit(register)', function(data){
+                        console.log('提交注册表单', data.field);
+                        $.ajax({
+                            url: 'register',
+                            type: 'POST',
+                            data: data.field,
+                            success: function(res){
+                                try {
+                                    if(res.code === 0){
+                                        layer.msg('注册成功', {icon: 1});
+                                        // 切换到登录标签
+                                        element.tabChange('user-tab', 0);
+                                    } else {
+                                        layer.msg(res.msg || '注册失败', {icon: 2});
+                                    }
+                                } catch(e) {
+                                    console.error('处理响应时出错:', e);
+                                    layer.msg('系统错误，请稍后重试', {icon: 2});
+                                }
+                            },
+                            error: function(xhr, status, error){
+                                console.error('Ajax请求失败:', error);
+                                layer.msg('网络错误，请稍后重试', {icon: 2});
+                            }
+                        });
+                        return false;
+                    });
                 }
             });
-        });
-
-        // 用户头像点击事件
-        $('#userAvatar').on('click', function(e) {
-            e.stopPropagation();
-            $('#userMenu').toggle();
-        });
-
-        // 点击页面其他地方关闭用户菜单
-        $(document).on('click', function() {
-            $('#userMenu').hide();
-        });
-
-        // 登录表单提交
-        form.on('submit(login)', function(data) {
-            // 保持原有的登录逻辑不变
-        });
-
-        // 注册表单提交
-        form.on('submit(register)', function(data) {
-            // 保持原有的注册逻辑不变
-        });
-
-        // 执行实例
-        var uploadInst = upload.render({
-            elem: '#uploadAvatar'
-            ,url: 'uploadAvatar'
-            ,accept: 'images'
-            ,acceptMime: 'image/*'
-            ,size: 5120 // 限制文件大小为5MB
-            ,before: function(obj){
-                obj.preview(function(index, file, result){
-                    $('#previewImg').attr('src', result);
-                });
-                layer.load();
-            }
-            ,done: function(res){
-                layer.closeAll('loading');
-                if(res.code === 0){
-                    layer.msg('上传成功');
-                    // 更新头像显示
-                    $('.user-avatar').attr('src', res.data);
-                } else {
-                    layer.msg('上传失败：' + res.msg);
-                }
-            }
-            ,error: function(){
-                layer.closeAll('loading');
-                layer.msg('上传失败，请重试');
-            }
         });
     });
 </script>
@@ -371,8 +431,10 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
             title: '登录/注册',
             area: ['360px', 'auto'],
             content: $('#sign'),
-            shade: 0.6,
-            anim: 1,
+            shadeClose: true,  // 点击遮罩关闭
+            shade: 0.6,        // 遮罩透明度
+            closeBtn: 1,       // 显示关闭按钮
+            anim: 1,          // 动画效果
             success: function(layero, index){
                 console.log('弹窗打开成功');
                 
@@ -427,6 +489,31 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
                 });
             }
         });
+    });
+});
+</script>
+
+<script>
+layui.use(['jquery'], function(){
+    var $ = layui.jquery;
+    
+    console.log('初始化头像菜单交互');
+    
+    // 头像点击事件
+    $('#userAvatar').on('click', function(e){
+        e.stopPropagation();
+        console.log('头像被点击');
+        $('#userMenu').slideToggle(200);
+    });
+    
+    // 点击其他区域关闭菜单
+    $(document).on('click', function(){
+        $('#userMenu').slideUp(200);
+    });
+    
+    // 防止菜单点击关闭
+    $('#userMenu').on('click', function(e){
+        e.stopPropagation();
     });
 });
 </script>
