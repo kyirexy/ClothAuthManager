@@ -3,67 +3,11 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>用户列表</title>
+    <title>用户管理</title>
     <link rel="stylesheet" href="static/common/layui/css/layui.css">
     <style>
-        body {
-            padding: 15px;
-            background-color: #f6f6f6;
-            margin: 0;
-        }
-        .layui-card {
-            margin: 0;
-            box-shadow: 0 1px 2px rgba(0,0,0,.05);
-            border-radius: 4px;
-        }
-        .main-header {
-            background-color: #2F4056;
-            color: #fff;
-            padding: 15px 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,.1);
-        }
-        .header-title {
-            font-size: 20px;
-            font-weight: 400;
-            margin: 0;
-        }
-        .header-breadcrumb {
-            margin-top: 8px;
-            color: #CFD2D4;
-        }
-        .header-breadcrumb a {
-            color: #CFD2D4;
-        }
-        .header-breadcrumb a:hover {
-            color: #fff;
-        }
-        .layui-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid #f6f6f6;
-        }
-        .layui-card-header .title {
-            font-size: 16px;
-            font-weight: 500;
-            color: #333;
-        }
-        .search-box {
-            margin-bottom: 20px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 4px;
-            box-shadow: 0 1px 2px rgba(0,0,0,.05);
-        }
-        .search-box .layui-form-item {
-            margin-bottom: 0;
-        }
-        .layui-btn {
-            border-radius: 3px;
-        }
-        .layui-btn-normal {
-            background-color: #1E9FFF;
+        .layui-table-tool-temp {
+            padding-right: 0;
         }
         .layui-table-tool {
             background-color: #fff;
@@ -86,13 +30,25 @@
             background-color: #999;
             color: #fff;
         }
+        .layui-card-header {
+            padding: 15px;
+            border-radius: 4px 4px 0 0;
+            background-color: #fff;
+        }
+        .layui-card-header .title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .layui-btn-group {
+            margin-left: auto;
+        }
     </style>
 </head>
 <body>
     <div class="layui-card">
-        <div class="layui-card-header">
+        <div class="layui-card-header" style="display: flex; justify-content: space-between; align-items: center;">
             <div class="title">用户列表</div>
-            <div class="layui-btn-group">
+            <div class="layui-btn-group" style="margin-right: 10px;">
                 <button class="layui-btn layui-btn-normal" id="addUser">
                     <i class="layui-icon">&#xe654;</i> 添加用户
                 </button>
@@ -184,7 +140,8 @@
     layui.use(['table', 'form', 'layer'], function(){
         var table = layui.table,
             form = layui.form,
-            layer = layui.layer;
+            layer = layui.layer,
+            $ = layui.jquery;
 
         // 初始化表格
         table.render({
@@ -272,14 +229,31 @@
             return false;
         });
 
-        // 添加用户按钮点击事件
-        $('#addUser').on('click', function(){
+        // 添加用户按钮事件监听
+        $(document).on('click', '#addUser', function(){
+            console.log('添加用户按钮被点击');
             layer.open({
                 type: 2,
                 title: '添加用户',
+                shade: 0.6,
+                area: ['500px', '450px'],
                 content: 'user-add.jsp',
-                area: ['500px', '400px'],
-                maxmin: true
+                success: function(layero, index){
+                    console.log('弹窗打开成功');
+                },
+                end: function() {
+                    table.reload('userTable');
+                }
+            });
+        });
+
+        // 刷新按钮事件监听
+        $(document).on('click', '#refreshTable', function(){
+            console.log('刷新按钮被点击');
+            table.reload('userTable', {
+                page: {
+                    curr: 1
+                }
             });
         });
     });

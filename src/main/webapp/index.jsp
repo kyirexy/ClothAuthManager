@@ -150,10 +150,10 @@
             if (loginUser != null) {
         %>
         <div class="user-info">
-            <img src="<%= loginUser.getProfilePicture() %>" 
-                 alt="User Avatar" 
-                 class="user-avatar" 
-                 id="userAvatar" 
+            <img src="<%= loginUser.getProfilePicture() %>"
+                 alt="User Avatar"
+                 class="user-avatar"
+                 id="userAvatar"
                  onerror="this.src='static/images/smail.jpg'">
             <div class="user-menu" id="userMenu" style="display: none;">
                 <div class="menu-item">

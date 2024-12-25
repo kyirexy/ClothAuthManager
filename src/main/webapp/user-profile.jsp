@@ -26,6 +26,22 @@
     if (avatar == null || avatar.isEmpty()) {
         avatar = "static/images/smail.jpg";
     }
+    
+    // 获取头像路径
+    String avatarPath = admin != null ? admin.getProfilePicture() : 
+                       (user != null ? user.getProfilePicture() : null);
+    
+    // 如果没有头像，使用默认头像
+    if (avatarPath == null || avatarPath.trim().isEmpty()) {
+        avatarPath = "static/images/smail.jpg";
+    } else if (avatarPath.startsWith("/")) {
+        avatarPath = avatarPath.substring(1);
+    }
+    // 注意：不需要添加额外的/，因为数据库中已经包含了
+    
+    // 判断是管理员还是普通用户
+    boolean isAdmin = (admin != null);
+    String returnUrl = isAdmin ? "admin-dashboard.jsp" : "index.jsp";
 %>
 <!DOCTYPE html>
 <html>
@@ -36,7 +52,7 @@
     <style>
         .profile-container {
             padding: 20px;
-            max-width: 1000px;
+            max-width: 800px;
             margin: 0 auto;
         }
         .profile-header {
@@ -96,8 +112,11 @@
             font-size: 16px;
         }
         .action-buttons {
-            text-align: center;
             margin-top: 30px;
+            text-align: center;
+        }
+        .action-buttons .layui-btn {
+            margin: 0 10px;
         }
         .layui-btn {
             padding: 0 30px;
@@ -105,14 +124,23 @@
             line-height: 38px;
             border-radius: 19px;
         }
+        .layui-btn-primary {
+            border: 1px solid #C9C9C9;
+        }
+        .layui-btn-primary:hover {
+            border-color: #009688;
+            color: #009688;
+        }
     </style>
 </head>
 <body>
     <div class="profile-container">
         <div class="profile-header">
             <div class="avatar-container">
-                <img src="<%= avatar != null && !avatar.isEmpty() ? avatar : "static/images/default-avatar.jpg" %>" 
-                     class="avatar" id="currentAvatar">
+                <img src="<%= avatarPath %>" 
+                     class="avatar" 
+                     id="currentAvatar"
+                     onerror="this.src='static/images/smail.jpg'">
                 <div class="avatar-upload" id="uploadAvatar">
                     <i class="layui-icon layui-icon-camera"></i>
                 </div>
@@ -136,12 +164,9 @@
             </div>
             
             <div class="action-buttons">
-                <button class="layui-btn" onclick="editProfile()">
-                    <i class="layui-icon layui-icon-edit"></i> 修改信息
-                </button>
-                <button class="layui-btn layui-btn-primary" onclick="changePassword()">
-                    <i class="layui-icon layui-icon-password"></i> 修改密码
-                </button>
+                <button type="button" class="layui-btn" onclick="openEditProfile()">编辑资料</button>
+                <button type="button" class="layui-btn layui-btn-normal" onclick="openChangePassword()">修改密码</button>
+                <button type="button" class="layui-btn layui-btn-primary" onclick="window.location.href='<%= returnUrl %>'">返回</button>
             </div>
         </div>
     </div>
@@ -152,62 +177,98 @@
         var upload = layui.upload,
             layer = layui.layer;
         
-        // 头像上传
         upload.render({
             elem: '#uploadAvatar'
             ,url: 'uploadAvatar'
             ,accept: 'images'
             ,acceptMime: 'image/*'
-            ,size: 5120
-            ,before: function(){
-                layer.load();
-            }
             ,done: function(res){
-                layer.closeAll('loading');
                 if(res.code === 0){
                     layer.msg('上传成功', {icon: 1});
-                    document.getElementById('currentAvatar').src = res.data + '?t=' + new Date().getTime();
-                    if(window.parent && window.parent.updateAvatar){
-                        window.parent.updateAvatar(res.data);
+                    // 移除前导的/
+                    var avatarPath = res.data;
+                    if (avatarPath.startsWith('/')) {
+                        avatarPath = avatarPath.substring(1);
                     }
-                    setTimeout(function(){
-                        location.reload();
-                    }, 1000);
+
+                    // 更新当前页面的头像
+                    document.getElementById('currentAvatar').src = avatarPath + '?t=' + new Date().getTime();
+
+                    // 更新父窗口的头像
+                    if (window.parent && window.parent.updateAdminAvatar) {
+                        window.parent.updateAdminAvatar(avatarPath);
+                    }
+
+                    // 更新顶层窗口的头像
+                    if (window.top && window.top.updateAdminAvatar) {
+                        window.top.updateAdminAvatar(avatarPath);
+                    }
                 } else {
                     layer.msg(res.msg || '上传失败', {icon: 2});
                 }
             }
             ,error: function(){
-                layer.closeAll('loading');
                 layer.msg('上传失败', {icon: 2});
             }
         });
+        
+        // 修改返回方法
+        window.returnToMain = function() {
+            var isAdmin = <%= isAdmin %>;
+            console.log("Is Admin:", isAdmin); // 调试信息
+            console.log("Return URL:", '<%= returnUrl %>'); // 调试信息
+            
+            try {
+                if (window.parent && window.parent.layer) {
+                    // 尝试关闭弹出层
+                    window.parent.layer.closeAll('iframe');
+                }
+            } catch (e) {
+                console.log("Error closing layer:", e); // 调试信息
+            }
+            
+            // 无论如何都进行跳转
+            window.location.href = '<%= returnUrl %>';
+        };
+        
+        // 打开编辑资料窗口
+        window.openEditProfile = function() {
+            layer.open({
+                type: 2,
+                title: '编辑个人资料',
+                shade: 0.6,
+                area: ['500px', '400px'],
+                content: 'edit-profile.jsp'
+            });
+        };
+        
+        // 打开修改密码窗口
+        window.openChangePassword = function() {
+            layer.open({
+                type: 2,
+                title: '修改密码',
+                shade: 0.6,
+                area: ['500px', '300px'],
+                content: 'change-password.jsp'
+            });
+        };
     });
     
-    // 修改信息
-    function editProfile() {
-        layer.open({
-            type: 2,
-            title: '修改个人信息',
-            area: ['500px', '400px'],
-            content: 'edit-profile.jsp',
-            maxmin: true,
-            end: function() {
-                // 刷新页面以更新信息
-                location.reload();
-            }
-        });
+    // 添加一个直接的返回函数
+    function returnToMain() {
+        var isAdmin = <%= isAdmin %>;
+        console.log("Direct return - Is Admin:", isAdmin); // 调试信息
+        window.location.href = '<%= returnUrl %>';
     }
     
-    // 修改密码
+    // 编辑资料方法
+    function editProfile() {
+        layer.msg('编辑资料功能开发中...', {icon: 0});
+    }
+    
+    // 修改密码方法
     function changePassword() {
-        layer.open({
-            type: 2,
-            title: '修改密码',
-            area: ['500px', '350px'],
-            content: 'change-password.jsp',
-            maxmin: true
-        });
+        layer.msg('修改密码功能开发中...', {icon: 0});
     }
     </script>
 </body>

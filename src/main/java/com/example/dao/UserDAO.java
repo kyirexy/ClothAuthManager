@@ -104,11 +104,18 @@ public class UserDAO {
             pstmt.setString(1, avatarPath);
             pstmt.setInt(2, userId);
             
-            return pstmt.executeUpdate() > 0;
-        } catch (Exception e) {
+            System.out.println("Executing SQL: " + sql);
+            System.out.println("Parameters: avatarPath=" + avatarPath + ", userId=" + userId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
             e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return false;
     }
 
     public boolean updateUser(User user) {
@@ -298,5 +305,45 @@ public class UserDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public boolean isUsernameExists(String username) {
+        String sql = "SELECT COUNT(*) FROM user WHERE username = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean addUser(User user) {
+        String sql = "INSERT INTO user (username, password, email, phone, status, registration_date) VALUES (?, ?, ?, ?, ?, NOW())";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, user.getUsername());
+            pstmt.setString(2, user.getPassword());
+            pstmt.setString(3, user.getEmail());
+            pstmt.setString(4, user.getPhone());
+            pstmt.setString(5, user.getStatus());
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

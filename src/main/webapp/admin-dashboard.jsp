@@ -1,4 +1,24 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.example.model.Admin" %>
+<%
+    // 获取当前登录的管理员信息
+    Admin loginAdmin = (Admin) session.getAttribute("loginAdmin");
+    if (loginAdmin == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
+    
+    // 获取头像路径和用户名
+    String avatarPath = loginAdmin.getProfilePicture();
+    String username = loginAdmin.getUsername();
+    
+    // 如果没有头像，使用默认头像
+    if (avatarPath == null || avatarPath.trim().isEmpty()) {
+        avatarPath = "static/images/smail.jpg";
+    } else if (avatarPath.startsWith("/")) {
+        avatarPath = avatarPath.substring(1);  // 移除前导的/
+    }
+%>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -141,8 +161,11 @@
         <ul class="layui-nav admin-header-right">
             <li class="layui-nav-item">
                 <a href="javascript:;" class="admin-header-user">
-                    <img src="static/images/smail.jpg" alt="头像">
-                    <span>管理员</span>
+                    <img src="<%= avatarPath %>" 
+                         alt="头像" 
+                         onerror="this.src='static/images/smail.jpg'"
+                         style="width: 35px; height: 35px; border-radius: 50%;">
+                    <span><%= username %></span>
                 </a>
                 <dl class="layui-nav-child">
                     <dd><a href="javascript:;" data-url="user-profile.jsp" class="menu-item"><i class="layui-icon">&#xe614;</i> 个人信息</a></dd>
@@ -290,6 +313,19 @@ layui.use(['element', 'layer', 'jquery'], function(){
     $('.change-password').on('click', function(){
         layer.msg('修改密码功能开发中...', {icon: 6});
     });
+
+    window.updateAdminAvatar = function(newAvatarPath) {
+        if (newAvatarPath) {
+            // 如果路径以/开头，去掉开头的/
+            if (newAvatarPath.startsWith('/')) {
+                newAvatarPath = newAvatarPath.substring(1);
+            }
+            console.log('Updating avatar to:', newAvatarPath);
+            
+            // 更新所有头像显示
+            $('.admin-header-user img').attr('src', newAvatarPath + '?t=' + new Date().getTime());
+        }
+    };
 });
 </script>
 </body>

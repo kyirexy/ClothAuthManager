@@ -53,7 +53,25 @@
     <script>
     layui.use(['form', 'layer'], function(){
         var form = layui.form,
-            layer = layui.layer;
+            layer = layui.layer,
+            $ = layui.jquery;
+        
+        // 自定义验证规则
+        form.verify({
+            username: function(value) {
+                if (value.length < 3 || value.length > 20) {
+                    return '用户名长度必须在3-20位之间';
+                }
+            },
+            password: [
+                /^[\S]{6,12}$/,
+                '密码必须6到12位，且不能出现空格'
+            ],
+            phone: [
+                /^1[3-9]\d{9}$/,
+                '请输入正确的手机号'
+            ]
+        });
         
         // 监听提交
         form.on('submit(addUserSubmit)', function(data){
@@ -76,9 +94,10 @@
                         layer.msg(res.msg || '添加失败', {icon: 2});
                     }
                 },
-                error: function(){
+                error: function(xhr, status, error){
                     layer.close(loadIndex);
-                    layer.msg('服务器错误', {icon: 2});
+                    console.error('添加用户失败:', error);
+                    layer.msg('服务器错误，添加失败', {icon: 2});
                 }
             });
             return false;

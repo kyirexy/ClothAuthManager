@@ -1,9 +1,9 @@
 package com.example.servlet;
 
-import com.example.dao.UserDAO;
 import com.example.dao.AdminDAO;
-import com.example.model.User;
+import com.example.dao.UserDAO;
 import com.example.model.Admin;
+import com.example.model.User;
 import com.example.util.FileUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -12,20 +12,24 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
-
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet("/uploadAvatar")
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024,    // 1 MB
-    maxFileSize = 1024 * 1024 * 5,      // 5 MB
-    maxRequestSize = 1024 * 1024 * 10    // 10 MB
+    maxFileSize = 1024 * 1024 * 5,      // 5MB
+    maxRequestSize = 1024 * 1024 * 10    // 10MB
 )
 public class UploadAvatarServlet extends HttpServlet {
-    
-    private UserDAO userDAO = new UserDAO();
     private AdminDAO adminDAO = new AdminDAO();
+    private UserDAO userDAO = new UserDAO();
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        FileUtil.setServletContext(getServletContext());
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -34,64 +38,49 @@ public class UploadAvatarServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         
         try {
-            // 获取当前登录用户
-            User user = (User) request.getSession().getAttribute("loginUser");
-            Admin admin = (Admin) request.getSession().getAttribute("loginAdmin");
-            
-            if (user == null && admin == null) {
-                out.print("{\"code\":1,\"msg\":\"请先登录\"}");
-                return;
-            }
-
-            // 获取上传的文件
             Part filePart = request.getPart("file");
-            if (filePart == null) {
-                out.print("{\"code\":1,\"msg\":\"请选择文件\"}");
-                return;
-            }
-
+            
             // 验证文件类型
             if (!FileUtil.isImageFile(filePart)) {
                 out.print("{\"code\":1,\"msg\":\"请上传图片文件\"}");
                 return;
             }
-
-            // 删除旧头像
-            if (user != null && user.getProfilePicture() != null) {
-                FileUtil.deleteImage(user.getProfilePicture());
-            } else if (admin != null && admin.getProfilePicture() != null) {
-                FileUtil.deleteImage(admin.getProfilePicture());
-            }
-
-            // 保存新头像
+            
+            // 保存图片
             String newAvatarPath = FileUtil.saveImage(filePart);
-            boolean updated = false;
-
+            System.out.println("New avatar path: " + newAvatarPath);
+            
             // 更新数据库
-            if (user != null) {
-                user.setProfilePicture(newAvatarPath);
-                updated = userDAO.updateAvatar(user.getId(), newAvatarPath);
+            boolean updated = false;
+            HttpSession session = request.getSession();
+            Admin loginAdmin = (Admin) session.getAttribute("loginAdmin");
+            User loginUser = (User) session.getAttribute("loginUser");
+            
+            if (loginAdmin != null) {
+                System.out.println("Updating admin avatar...");
+                updated = adminDAO.updateAvatar(loginAdmin.getId(), newAvatarPath);
                 if (updated) {
-                    request.getSession().setAttribute("loginUser", user);
+                    loginAdmin.setProfilePicture(newAvatarPath);
+                    session.setAttribute("loginAdmin", loginAdmin);
                 }
-            } else if (admin != null) {
-                admin.setProfilePicture(newAvatarPath);
-                updated = adminDAO.updateAvatar(admin.getId(), newAvatarPath);
+            } else if (loginUser != null) {
+                System.out.println("Updating user avatar...");
+                updated = userDAO.updateAvatar(loginUser.getId(), newAvatarPath);
                 if (updated) {
-                    request.getSession().setAttribute("loginAdmin", admin);
+                    loginUser.setProfilePicture(newAvatarPath);
+                    session.setAttribute("loginUser", loginUser);
                 }
             }
             
             if (updated) {
-                String avatarUrl = newAvatarPath + "?t=" + System.currentTimeMillis();
-                out.print("{\"code\":0,\"msg\":\"上传成功\",\"data\":\"" + avatarUrl + "\"}");
+                out.print("{\"code\":0,\"msg\":\"上传成功\",\"data\":\"" + newAvatarPath + "\"}");
             } else {
-                out.print("{\"code\":1,\"msg\":\"更新失败\"}");
+                out.print("{\"code\":1,\"msg\":\"更新失败，请检查用户登录状态\"}");
             }
             
         } catch (Exception e) {
             e.printStackTrace();
-            out.print("{\"code\":1,\"msg\":\"" + e.getMessage() + "\"}");
+            out.print("{\"code\":1,\"msg\":\"上传失败: " + e.getMessage() + "\"}");
         }
     }
 } 
