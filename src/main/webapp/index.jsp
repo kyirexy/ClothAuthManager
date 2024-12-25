@@ -148,7 +148,7 @@
         <%
             User loginUser = (User) session.getAttribute("loginUser");
             if (loginUser != null) {
-        %>  
+        %>
         <div class="user-info">
             <img src="<%= loginUser.getProfilePicture() %>" 
                  alt="User Avatar" 
