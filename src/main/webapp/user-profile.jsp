@@ -1,225 +1,117 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.example.model.Admin" %>
 <%@ page import="com.example.model.User" %>
+<%
+    // 获取session中的用户信息
+    Admin admin = (Admin) session.getAttribute("loginAdmin");
+    User user = (User) session.getAttribute("loginUser");
+    String username = "";
+    String role = "";
+    String email = "";
+    String phone = "";
+    
+    if (admin != null) {
+        username = admin.getUsername();
+        role = "系统管理员";
+        email = admin.getEmail();
+        phone = admin.getPhone();
+    } else if (user != null) {
+        username = user.getUsername();
+        role = "普通用户";
+        email = user.getEmail();
+        phone = user.getPhone();
+    }
+%>
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人信息 - 时尚服装购物网站</title>
-    <link rel="stylesheet" href="static/layui/css/layui.css"/>
-    <script src="static/layui/layui.js"></script>
+    <title>个人信息</title>
+    <link rel="stylesheet" href="static/common/layui/css/layui.css">
     <style>
         body {
-            background-color: #f5f5f5;
-            padding: 20px;
+            padding: 15px;
+            background-color: #f6f6f6;
         }
-        .profile-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .profile-header {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-        }
-        .back-btn {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 60px;
-            margin: 0 auto 20px;
-            display: block;
-            border: 4px solid #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            object-fit: cover;
-        }
-        .profile-title {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .info-section {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        .info-title {
-            font-size: 18px;
-            color: #333;
+        .layui-card {
             margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,.05);
+            border-radius: 4px;
         }
-        .layui-form-label {
-            width: 100px;
-        }
-        .layui-input-block {
-            margin-left: 130px;
-        }
-        .action-buttons {
+        .user-info-header {
             text-align: center;
-            margin-top: 30px;
+            padding: 30px 0;
+        }
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+        .info-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .info-label {
+            color: #666;
+            margin-right: 15px;
         }
     </style>
 </head>
 <body>
-    <%
-        User user = (User) session.getAttribute("loginUser");
-        if (user != null) {
-    %>
-    <div class="profile-container">
-        <div class="profile-header">
-            <button class="layui-btn layui-btn-primary back-btn" onclick="window.location.href='index.jsp'">
-                <i class="layui-icon layui-icon-left"></i> 返回首页
-            </button>
-            <img src="<%= user.getProfilePicture() %>" 
-                 alt="用户头像" 
-                 class="profile-avatar"
-                 onerror="this.src='static/images/smail.jpg'">
-            <h1 class="profile-title">个人信息</h1>
+    <div class="layui-card">
+        <div class="layui-card-header">
+            <span class="layui-icon layui-icon-user"></span> 个人信息
         </div>
-
-        <form class="layui-form" action="updateProfile" method="post">
-            <div class="info-section">
-                <h2 class="info-title">基本信息</h2>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">用户名</label>
-                    <div class="layui-input-block">
-                        <input type="text" name="username" value="<%= user.getUsername() %>" 
-                               class="layui-input" readonly>
-                    </div>
+        <div class="layui-card-body">
+            <div class="user-info-header">
+                <img src="static/images/avatar.jpg" class="user-avatar">
+                <h2><%= username %></h2>
+            </div>
+            
+            <div class="layui-form">
+                <div class="info-item">
+                    <span class="info-label">用户名：</span>
+                    <span><%= username %></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">角色：</span>
+                    <span><%= role %></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">邮箱：</span>
+                    <span><%= email %></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">手机号：</span>
+                    <span><%= phone %></span>
                 </div>
                 
-                <div class="layui-form-item">
-                    <label class="layui-form-label">邮箱</label>
-                    <div class="layui-input-block">
-                        <input type="email" name="email" value="<%= user.getEmail() %>" 
-                               required lay-verify="required|email" 
-                               placeholder="请输入邮箱" class="layui-input">
-                    </div>
-                </div>
-
-                <div class="layui-form-item">
-                    <label class="layui-form-label">性别</label>
-                    <div class="layui-input-block">
-                        <input type="radio" name="gender" value="M" title="男" <%= "M".equals(user.getGender()) ? "checked" : "" %>>
-                        <input type="radio" name="gender" value="F" title="女" <%= "F".equals(user.getGender()) ? "checked" : "" %>>
-                    </div>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <h2 class="info-title">联系方式</h2>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">手机号码</label>
-                    <div class="layui-input-block">
-                        <input type="text" name="phone" value="<%= user.getPhone() %>" 
-                               required lay-verify="required|phone" 
-                               placeholder="请输入手机号" class="layui-input">
-                    </div>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <h2 class="info-title">头像设置</h2>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">更换头像</label>
-                    <div class="layui-input-block">
-                        <button type="button" class="layui-btn" id="uploadAvatar">
-                            <i class="layui-icon layui-icon-upload"></i> 上传图片
-                        </button>
-                        <div class="layui-form-mid layui-word-aux">支持jpg、png格式，大小不超过2MB</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="updateProfile">
-                    <i class="layui-icon layui-icon-ok"></i> 保存修改
-                </button>
-                <button type="button" class="layui-btn layui-btn-primary" onclick="window.location.href='index.jsp'">
-                    <i class="layui-icon layui-icon-close"></i> 取消
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <script>
-    layui.use(['form', 'upload', 'layer'], function(){
-        var form = layui.form,
-            upload = layui.upload,
-            layer = layui.layer,
-            $ = layui.jquery;
-
-        // 头像上传
-        upload.render({
-            elem: '#uploadAvatar',
-            url: 'uploadAvatar',
-            accept: 'images',
-            acceptMime: 'image/*',
-            size: 2048,
-            done: function(res){
-                if(res.code === 0){
-                    layer.msg('上传成功', {icon: 1});
-                    $('.profile-avatar').attr('src', res.data.src);
-                } else {
-                    layer.msg(res.msg || '上传失败', {icon: 2});
-                }
-            }
-        });
-
-        // 表单提交
-        form.on('submit(updateProfile)', function(data){
-            $.ajax({
-                url: 'updateProfile',
-                type: 'POST',
-                data: data.field,
-                success: function(res){
-                    if(res.code === 0){
-                        layer.msg('更新成功', {
-                            icon: 1,
-                            time: 1500
-                        }, function(){
-                            window.location.reload();
-                        });
-                    } else {
-                        layer.msg(res.msg || '更新失败', {icon: 2});
-                    }
-                },
-                error: function(){
-                    layer.msg('服务器错误，请稍后重试', {icon: 2});
-                }
-            });
-            return false;
-        });
-    });
-    </script>
-    <%
-        } else {
-    %>
-    <div class="profile-container">
-        <div class="layui-card">
-            <div class="layui-card-header">提示</div>
-            <div class="layui-card-body">
-                请先登录后查看个人信息
-                <div style="margin-top: 15px;">
-                    <a href="index.jsp" class="layui-btn">返回首页</a>
+                <div style="margin-top: 30px; text-align: center;">
+                    <button class="layui-btn" onclick="editInfo()">
+                        <i class="layui-icon">&#xe642;</i> 修改信息
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-    <%
-        }
-    %>
+
+    <script src="static/common/layui/layui.js"></script>
+    <script>
+    layui.use(['layer'], function(){
+        var layer = layui.layer;
+    });
+    
+    function editInfo() {
+        layer.open({
+            type: 2,
+            title: '修改个人信息',
+            area: ['500px', '400px'],
+            content: 'edit-profile.jsp',
+            maxmin: true
+        });
+    }
+    </script>
 </body>
 </html>
 

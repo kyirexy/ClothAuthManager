@@ -286,7 +286,7 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
     // 登录按钮点击事件
     $('#loginBtn').on('click', function(){
         console.log('登录按钮被点击');
-        
+
         // 打开弹窗
         layer.open({
             type: 1,
@@ -301,7 +301,7 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
                 // 重置表单
                 $('form[lay-filter="loginForm"]')[0].reset();
                 $('form[lay-filter="registerForm"]')[0].reset();
-                
+
                 // 重新渲染表单
                 form.render();
             }
@@ -311,29 +311,26 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
     // 监听登录提交
     form.on('submit(login)', function(data){
         var loadIndex = layer.load(1);
-        
+
         $.ajax({
             url: 'login',
             type: 'POST',
-            data: data.field,
+            data: {
+                username: data.field.username,
+                password: data.field.password,
+                role: $('input[name="role"]:checked').val() || 'user'
+            },
             dataType: 'json',
             success: function(res){
                 layer.close(loadIndex);
-                
                 if(res.code === 0){
-                    layer.msg(res.msg, {
+                    layer.msg('登录成功', {
                         icon: 1,
-                        time: 1500
+                        time: 1000
                     }, function(){
-                        if(res.role === 'admin'){
-                            console.log('准备跳转到管理员页面');
-                            // 添加一个小延迟，确保session已经完全设置
-                            setTimeout(function() {
-                                window.location.href = 'admin-dashboard.jsp';
-                            }, 100);
-                        } else {
+                        res.role === 'admin' ?
+                            window.location.href = 'admin-dashboard.jsp' :
                             window.location.reload();
-                        }
                     });
                 } else {
                     layer.msg(res.msg, {icon: 2});
@@ -341,7 +338,7 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
             },
             error: function(){
                 layer.close(loadIndex);
-                layer.msg('服务器错误，请稍后重试', {icon: 2});
+                layer.msg('服务器错误', {icon: 2});
             }
         });
         return false;
@@ -350,21 +347,21 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
     // 监听注册提交
     form.on('submit(register)', function(data){
         console.log('注册表单提交', data.field);
-        
+
         // 表单验证
-        if(!data.field.username || !data.field.password || !data.field.repassword || 
+        if(!data.field.username || !data.field.password || !data.field.repassword ||
            !data.field.email || !data.field.phone) {
             layer.msg('请填写完整注册信息', {icon: 2});
             return false;
         }
-        
+
         if(data.field.password !== data.field.repassword) {
             layer.msg('两次密码输入不一致', {icon: 2});
             return false;
         }
-        
+
         var loadIndex = layer.load(1);
-        
+
         $.ajax({
             url: 'register',
             type: 'POST',
@@ -373,7 +370,7 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
             success: function(res){
                 layer.close(loadIndex);
                 console.log('注册响应:', res);
-                
+
                 if(res.code === 0){
                     // 注册成功后自动登录
                     $.ajax({
@@ -422,12 +419,12 @@ layui.use(['layer', 'form', 'element', 'jquery'], function(){
         console.log('头像被点击');
         $('#userMenu').slideToggle(200);
     });
-    
+
     // 点击其他区域关闭菜单
     $(document).on('click', function(){
         $('#userMenu').slideUp(200);
     });
-    
+
     // 防止菜单点击关闭
     $('#userMenu').on('click', function(e){
         e.stopPropagation();

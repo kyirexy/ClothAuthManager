@@ -15,9 +15,6 @@ public class AdminDAO {
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            // 添加调试日志
-            System.out.println("Executing admin login query - Username: " + username);
-            
             pstmt.setString(1, username);
             pstmt.setString(2, username);
             pstmt.setString(3, username);
@@ -47,18 +44,11 @@ public class AdminDAO {
                     admin.setLastLogin(new Date(lastLoginTime.getTime()));
                 }
                 
-                // 添加调试日志
-                System.out.println("Admin found: " + admin.getUsername());
-                
                 // 更新最后登录时间
                 updateLastLogin(admin.getId());
                 
                 return admin;
             }
-            
-            // 添加调试日志
-            System.out.println("No admin found with provided credentials");
-            
         } catch (Exception e) {
             System.err.println("Error in admin login: " + e.getMessage());
             e.printStackTrace();

@@ -6,52 +6,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理员控制台 - 时尚服装购物网站</title>
     <link rel="stylesheet" href="static/common/layui/css/layui.css"/>
-    <script src="static/common/layui/layui.js"></script>
     <style>
+        /* 全局样式 */
+        .layui-layout-admin .layui-header {
+            background-color: #2F4056;
+            box-shadow: 0 1px 4px rgba(0,0,0,.2);
+        }
+        
         .layui-layout-admin .layui-logo {
             color: #fff;
             font-size: 18px;
+            font-weight: 600;
+            background-color: #243346;
+            box-shadow: 0 1px 4px rgba(0,0,0,.1);
         }
-        .layui-side-scroll {
-            width: 200px;
-        }
-        .layui-nav-tree {
-            width: 100%;
-        }
-        .layui-layout-admin .layui-body {
-            bottom: 0;
-        }
-        .admin-header {
-            padding: 10px 15px;
-            background-color: #23262E;
-        }
+        
+        /* 顶部导航栏样式 */
         .admin-header-right {
-            float: right;
+            position: absolute;
+            right: 15px;
         }
-        .admin-main {
+        
+        .admin-header-user {
+            display: flex;
+            align-items: center;
+            color: #fff;
+        }
+        
+        .admin-header-user img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid rgba(255,255,255,.3);
+        }
+        
+        /* 侧边栏样式 */
+        .layui-side {
+            background-color: #2F4056;
+            box-shadow: 2px 0 6px rgba(0,0,0,.1);
+        }
+        
+        .layui-nav-tree {
+            background-color: transparent;
+        }
+        
+        .layui-nav-tree .layui-nav-item {
+            margin: 5px 0;
+        }
+        
+        .layui-nav-tree .layui-nav-item a {
+            height: 50px;
+            line-height: 50px;
+            padding-left: 25px;
+            border-radius: 0 25px 25px 0;
+            margin: 0 15px 0 0;
+        }
+        
+        .layui-nav-tree .layui-nav-item a:hover {
+            background-color: rgba(255,255,255,.1);
+        }
+        
+        .layui-nav-tree .layui-nav-child a {
+            height: 40px;
+            line-height: 40px;
+            padding-left: 45px;
+        }
+        
+        /* 主要内容区域样式 */
+        .layui-body {
+            background-color: #f6f6f6;
             padding: 15px;
+            overflow: hidden;
         }
-        .layui-card {
-            margin-bottom: 15px;
+        
+        .layui-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
-        .layui-card-header {
-            font-weight: bold;
+        
+        .welcome-card {
+            background: linear-gradient(45deg, #1E9FFF, #39b8ff);
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.1);
+            margin-bottom: 20px;
         }
-        .stat-box {
-            text-align: center;
-            padding: 20px 0;
+        
+        .welcome-title {
+            font-size: 24px;
+            margin-bottom: 10px;
         }
-        .stat-box .layui-icon {
-            font-size: 40px;
-            color: #1E9FFF;
+        
+        .stat-cards {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
         }
-        .stat-box .stat-value {
+        
+        .stat-card {
+            flex: 1;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.05);
+        }
+        
+        .stat-value {
             font-size: 24px;
             font-weight: bold;
+            color: #333;
             margin: 10px 0;
         }
-        .stat-box .stat-name {
-            color: #999;
+        
+        .stat-name {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .stat-icon {
+            float: right;
+            font-size: 48px;
+            color: rgba(47, 64, 86, 0.2);
         }
     </style>
 </head>
@@ -59,188 +137,160 @@
 <div class="layui-layout layui-layout-admin">
     <!-- 头部区域 -->
     <div class="layui-header">
-        <div class="layui-logo">时尚服装购物网站管理系统</div>
-        <ul class="layui-nav layui-layout-right">
+        <div class="layui-logo">时尚服装管理系统</div>
+        <ul class="layui-nav admin-header-right">
             <li class="layui-nav-item">
-                <a href="javascript:;">
-                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
-                    管理员
+                <a href="javascript:;" class="admin-header-user">
+                    <img src="static/images/smail.jpg" alt="头像">
+                    <span>管理员</span>
                 </a>
                 <dl class="layui-nav-child">
-                    <dd><a href="">基本资料</a></dd>
-                    <dd><a href="">安全设置</a></dd>
+                    <dd><a href="javascript:;" data-url="user-profile.jsp" class="menu-item"><i class="layui-icon">&#xe614;</i> 个人信息</a></dd>
+                    <dd><a href="javascript:;" class="change-password"><i class="layui-icon">&#xe620;</i> 修改密码</a></dd>
+                    <dd><a href="javascript:;" class="logout"><i class="layui-icon">&#xe682;</i> 退出登录</a></dd>
                 </dl>
             </li>
-            <li class="layui-nav-item"><a href="">退出</a></li>
         </ul>
     </div>
-
+    
     <!-- 左侧导航区域 -->
     <div class="layui-side layui-bg-black">
         <div class="layui-side-scroll">
-            <ul class="layui-nav layui-nav-tree" lay-filter="test">
-                <li class="layui-nav-item layui-nav-itemed">
-                    <a class="" href="javascript:;">用户管理</a>
+            <ul class="layui-nav layui-nav-tree">
+                <li class="layui-nav-item layui-this">
+                    <a href="javascript:;" class="menu-item" data-url="dashboard"><i class="layui-icon">&#xe68e;</i> 控制台</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;"><i class="layui-icon">&#xe770;</i> 用户管理</a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;" data-url="user-list.jsp">用户列表</a></dd>
-                        <dd><a href="javascript:;" data-url="user-add.jsp">添加用户</a></dd>
-                        <dd><a href="javascript:;" data-url="user-roles.jsp">用户角色</a></dd>
+                        <dd><a href="javascript:;" data-url="user-list.jsp" class="menu-item" id="userListMenu">用户列表</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;">商品管理</a>
+                    <a href="javascript:;"><i class="layui-icon">&#xe698;</i> 商品管理</a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;" data-url="product-list.jsp">商品列表</a></dd>
-                        <dd><a href="javascript:;" data-url="product-add.jsp">添加商品</a></dd>
-                        <dd><a href="javascript:;" data-url="product-category.jsp">商品分类</a></dd>
+                        <dd><a href="javascript:;">商品列表</a></dd>
+                        <dd><a href="javascript:;">分类管理</a></dd>
+                        <dd><a href="javascript:;">库存管理</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;">订单管理</a>
+                    <a href="javascript:;"><i class="layui-icon">&#xe65e;</i> 订单管理</a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;" data-url="order-list.jsp">订单列表</a></dd>
-                        <dd><a href="javascript:;" data-url="order-stats.jsp">订单统计</a></dd>
+                        <dd><a href="javascript:;">订单列表</a></dd>
+                        <dd><a href="javascript:;">订单统计</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;">系统设置</a>
-                    <dl class="layui-nav-child">
-                        <dd><a href="javascript:;" data-url="system-config.jsp">网站配置</a></dd>
-                        <dd><a href="javascript:;" data-url="system-log.jsp">系统日志</a></dd>
-                    </dl>
+                    <a href="javascript:;"><i class="layui-icon">&#xe716;</i> 系统设置</a>
                 </li>
             </ul>
         </div>
     </div>
-
+    
     <!-- 内容主体区域 -->
-    <div class="layui-body">
-        <div class="admin-header">
-            <span id="current-page">控制台</span>
-            <div class="admin-header-right">
-                <span id="current-time"></span>
+    <div class="layui-body" id="admin-body">
+        <!-- 默认显示欢迎页面内容 -->
+        <div id="welcome-page">
+            <!-- 欢迎卡片 -->
+            <div class="welcome-card">
+                <div class="welcome-title">欢迎回来，管理员</div>
+                <div>今天是 <span id="current-date"></span></div>
             </div>
-        </div>
-        <div class="admin-main">
-            <div class="layui-row layui-col-space15">
-                <div class="layui-col-md3">
-                    <div class="layui-card">
-                        <div class="layui-card-body stat-box">
-                            <i class="layui-icon layui-icon-user"></i>
-                            <div class="stat-value">1,234</div>
-                            <div class="stat-name">总用户数</div>
-                        </div>
-                    </div>
+            
+            <!-- 统计卡片 -->
+            <div class="stat-cards">
+                <div class="stat-card">
+                    <i class="layui-icon stat-icon">&#xe770;</i>
+                    <div class="stat-name">总用户数</div>
+                    <div class="stat-value">1,234</div>
+                    <div>较昨日 <span style="color:#52c41a">+12</span></div>
                 </div>
-                <div class="layui-col-md3">
-                    <div class="layui-card">
-                        <div class="layui-card-body stat-box">
-                            <i class="layui-icon layui-icon-cart"></i>
-                            <div class="stat-value">56</div>
-                            <div class="stat-name">今日订单</div>
-                        </div>
-                    </div>
+                <div class="stat-card">
+                    <i class="layui-icon stat-icon">&#xe657;</i>
+                    <div class="stat-name">总订单数</div>
+                    <div class="stat-value">892</div>
+                    <div>较昨日 <span style="color:#52c41a">+5</span></div>
                 </div>
-                <div class="layui-col-md3">
-                    <div class="layui-card">
-                        <div class="layui-card-body stat-box">
-                            <i class="layui-icon layui-icon-rmb"></i>
-                            <div class="stat-value">￥9,876</div>
-                            <div class="stat-name">今日销售额</div>
-                        </div>
-                    </div>
+                <div class="stat-card">
+                    <i class="layui-icon stat-icon">&#xe65e;</i>
+                    <div class="stat-name">今日销售额</div>
+                    <div class="stat-value">��12,345</div>
+                    <div>较昨日 <span style="color:#52c41a">+8%</span></div>
                 </div>
-                <div class="layui-col-md3">
-                    <div class="layui-card">
-                        <div class="layui-card-body stat-box">
-                            <i class="layui-icon layui-icon-notice"></i>
-                            <div class="stat-value">15</div>
-                            <div class="stat-name">未处理消息</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="layui-card">
-                <div class="layui-card-header">最近活动</div>
-                <div class="layui-card-body">
-                    <ul class="layui-timeline">
-                        <li class="layui-timeline-item">
-                            <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
-                            <div class="layui-timeline-content layui-text">
-                                <h3 class="layui-timeline-title">8:30</h3>
-                                <p>用户"张三"注册成功</p>
-                            </div>
-                        </li>
-                        <li class="layui-timeline-item">
-                            <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
-                            <div class="layui-timeline-content layui-text">
-                                <h3 class="layui-timeline-title">11:20</h3>
-                                <p>新增订单：#12345</p>
-                            </div>
-                        </li>
-                        <li class="layui-timeline-item">
-                            <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
-                            <div class="layui-timeline-content layui-text">
-                                <h3 class="layui-timeline-title">14:00</h3>
-                                <p>更新商品库存：SKU001</p>
-                            </div>
-                        </li>
-                    </ul>
+                <div class="stat-card">
+                    <i class="layui-icon stat-icon">&#xe698;</i>
+                    <div class="stat-name">商品总数</div>
+                    <div class="stat-value">456</div>
+                    <div>较昨日 <span style="color:#52c41a">+3</span></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script src="static/common/layui/layui.js"></script>
 <script>
-    layui.use(['element', 'layer', 'util'], function(){
-        var element = layui.element
-            ,layer = layui.layer
-            ,util = layui.util
-            ,$ = layui.jquery;
-
-        // 更新当前时间
-        function updateTime() {
-            var now = new Date();
-            $('#current-time').text(now.toLocaleString());
-        }
-        updateTime();
-        setInterval(updateTime, 1000);
-
-        // 侧边栏点击事件
-        $('.layui-nav-child a').on('click', function(){
-            var url = $(this).data('url');
-            var title = $(this).text();
-            $('#current-page').text(title);
-            // 这里可以添加加载页面内容的逻辑
-            layer.msg('正在加载 ' + title + ' 页面');
-        });
-
-        // 示例：触发一个弹窗
-        $('.stat-box').on('click', function(){
-            var statName = $(this).find('.stat-name').text();
-            var statValue = $(this).find('.stat-value').text();
-            layer.open({
-                type: 1
-                ,title: statName + '详情'
-                ,area: ['300px', '200px']
-                ,shade: 0.8
-                ,id: 'LAY_layuipro'
-                ,btn: ['确定', '取消']
-                ,btnAlign: 'c'
-                ,moveType: 1
-                ,content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">'+ statName +': '+ statValue +'</div>'
-                ,success: function(layero){
-                    var btn = layero.find('.layui-layer-btn');
-                    btn.find('.layui-layer-btn0').attr({
-                        href: 'http://www.layui.com/'
-                        ,target: '_blank'
-                    });
-                }
+layui.use(['element', 'layer', 'jquery'], function(){
+    var element = layui.element
+        ,layer = layui.layer
+        ,$ = layui.jquery;
+    
+    // 更新当前日期
+    var now = new Date();
+    document.getElementById('current-date').textContent = 
+        now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日';
+    
+    // 菜单点击事件处理
+    $('.menu-item').on('click', function(e){
+        e.preventDefault();
+        var url = $(this).data('url');
+        
+        if(url === 'dashboard'){ // 点击控制台
+            // 显示欢迎页面
+            $('#welcome-page').show();
+            // 移除iframe
+            $('#admin-body iframe').remove();
+        } else if(url) {
+            // 隐藏欢迎页面
+            $('#welcome-page').hide();
+            
+            // 如果已经存在iframe，先移除
+            $('#admin-body iframe').remove();
+            
+            // 创建新的iframe
+            var iframe = $('<iframe>').attr({
+                src: url,
+                frameborder: '0',
+                width: '100%',
+                height: '100%'
             });
+            
+            $('#admin-body').append(iframe);
+        }
+        
+        // 更新选中状态
+        $('.layui-nav-item .layui-this').removeClass('layui-this');
+        $(this).parent().addClass('layui-this');
+    });
+
+    // 退出登录事件
+    $('.logout').on('click', function(){
+        layer.confirm('确定要退出登录吗？', {
+            icon: 3,
+            title: '提示'
+        }, function(index){
+            // 直接跳转到logout servlet
+            window.location.href = 'logout';
+            layer.close(index);
         });
     });
+
+    // 修改密码事件
+    $('.change-password').on('click', function(){
+        layer.msg('修改密码功能开发中...', {icon: 6});
+    });
+});
 </script>
 </body>
 </html>
