@@ -66,4 +66,67 @@ public class AdminDAO {
             e.printStackTrace();
         }
     }
+
+    public boolean updateAdmin(Admin admin) {
+        String sql = "UPDATE admin SET email = ?, phone = ? WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, admin.getEmail());
+            pstmt.setString(2, admin.getPhone());
+            pstmt.setInt(3, admin.getId());
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean verifyPassword(int adminId, String password) {
+        String sql = "SELECT password FROM admin WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, adminId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return password.equals(rs.getString("password"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updatePassword(int adminId, String newPassword) {
+        String sql = "UPDATE admin SET password = ? WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, newPassword);
+            pstmt.setInt(2, adminId);
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateAvatar(int adminId, String avatarPath) {
+        String sql = "UPDATE admin SET profile_picture = ? WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, avatarPath);
+            pstmt.setInt(2, adminId);
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

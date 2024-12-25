@@ -1,56 +1,70 @@
 package com.example.util;
 
-
 import jakarta.servlet.http.Part;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
 public class FileUtil {
-    private static final String UPLOAD_PATH = "D:\\develop\\Java\\project\\javaweb\\ClothAuthManager\\src\\main\\resources\\static\\images\\";
-    private static final String[] ALLOWED_TYPES = {".jpg", ".jpeg", ".png", ".gif"};
-
+    // 修改为新的图片存储路径
+    private static final String IMAGE_UPLOAD_PATH = "D:\\develop\\Java\\project\\javaweb\\ClothAuthManager\\src\\main\\webapp\\static\\images";
+    
     public static String saveImage(Part filePart) throws IOException {
-        // 获取文件名
-        String fileName = filePart.getSubmittedFileName();
-        String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-
-        // 检查文件类型
-        boolean isAllowedType = false;
-        for (String type : ALLOWED_TYPES) {
-            if (type.equals(fileExtension)) {
-                isAllowedType = true;
-                break;
-            }
-        }
-        if (!isAllowedType) {
-            throw new IOException("不支持的文件类型");
-        }
-
-        // 生成新文件名
-        String newFileName = UUID.randomUUID().toString() + fileExtension;
-        String filePath = UPLOAD_PATH + newFileName;
-
         // 确保目录存在
-        File uploadDir = new File(UPLOAD_PATH);
+        File uploadDir = new File(IMAGE_UPLOAD_PATH);
         if (!uploadDir.exists()) {
             uploadDir.mkdirs();
         }
 
+        // 获取文件扩展名
+        String fileName = filePart.getSubmittedFileName();
+        String fileExtension = fileName.substring(fileName.lastIndexOf("."));
+        
+        // 生成新的文件名
+        String newFileName = UUID.randomUUID().toString() + fileExtension;
+        
+        // 完整的文件保存路径
+        String filePath = IMAGE_UPLOAD_PATH + File.separator + newFileName;
+        
         // 保存文件
         filePart.write(filePath);
-
-        // 返回相对路径
-        return "static/images/" + newFileName;
+        
+        // 返回相对路径，用于数据库存储和前端显示
+        return "/static/images/" + newFileName;
     }
 
-    public static void deleteImage(String imagePath) {
-        if (imagePath != null && !imagePath.equals(UPLOAD_PATH + "img.png")) {
-            File file = new File(UPLOAD_PATH + imagePath.substring(imagePath.lastIndexOf("/") + 1));
-            if (file.exists()) {
-                file.delete();
-            }
+    public static boolean deleteImage(String imagePath) {
+        if (imagePath == null || imagePath.trim().isEmpty()) {
+            return false;
         }
+
+        // 如果路径以static/images开头，需要添加完整路径
+        if (imagePath.startsWith("/static/images/")) {
+            imagePath = "D:\\develop\\Java\\project\\javaweb\\ClothAuthManager\\src\\main\\webapp" + imagePath;
+        }
+
+        File file = new File(imagePath);
+        return file.exists() && file.delete();
+    }
+
+    // 验证文件类型
+    public static boolean isImageFile(Part filePart) {
+        String contentType = filePart.getContentType();
+        if (contentType == null) {
+            return false;
+        }
+        // 验证是否为图片类型
+        return contentType.startsWith("image/");
+    }
+
+    // 验证文件大小（可选）
+    public static boolean isFileSizeValid(Part filePart, long maxSize) {
+        return filePart.getSize() <= maxSize;
+    }
+
+    // 获取文件扩展名（可选）
+    public static String getFileExtension(Part filePart) {
+        String fileName = filePart.getSubmittedFileName();
+        return fileName.substring(fileName.lastIndexOf("."));
     }
 } 

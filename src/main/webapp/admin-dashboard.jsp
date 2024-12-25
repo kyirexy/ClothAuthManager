@@ -215,7 +215,7 @@
                 <div class="stat-card">
                     <i class="layui-icon stat-icon">&#xe65e;</i>
                     <div class="stat-name">今日销售额</div>
-                    <div class="stat-value">��12,345</div>
+                    <div class="stat-value">12,345</div>
                     <div>较昨日 <span style="color:#52c41a">+8%</span></div>
                 </div>
                 <div class="stat-card">

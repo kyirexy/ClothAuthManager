@@ -16,8 +16,8 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-@WebServlet("/updateProfile")
-public class UpdateProfileServlet extends HttpServlet {
+@WebServlet("/changePassword")
+public class ChangePasswordServlet extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
     private AdminDAO adminDAO = new AdminDAO();
     
@@ -29,46 +29,33 @@ public class UpdateProfileServlet extends HttpServlet {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取当前登录用户
+            String oldPassword = request.getParameter("oldPassword");
+            String newPassword = request.getParameter("newPassword");
+            
             User user = (User) request.getSession().getAttribute("loginUser");
             Admin admin = (Admin) request.getSession().getAttribute("loginAdmin");
             
-            // 获取表单数据
-            String email = request.getParameter("email");
-            String phone = request.getParameter("phone");
-
-            // 验证数据
-            if (!isValidEmail(email)) {
-                result.put("code", 1);
-                result.put("msg", "邮箱格式不正确");
-                out.write(new Gson().toJson(result));
-                return;
-            }
-
-            if (!isValidPhone(phone)) {
-                result.put("code", 1);
-                result.put("msg", "手机号格式不正确");
-                out.write(new Gson().toJson(result));
-                return;
-            }
-
             boolean updated = false;
             
             if (admin != null) {
-                // 更新管理员信息
-                admin.setEmail(email);
-                admin.setPhone(phone);
-                updated = adminDAO.updateAdmin(admin);
-                if (updated) {
-                    request.getSession().setAttribute("loginAdmin", admin);
+                // 验证管理员原密码
+                if (adminDAO.verifyPassword(admin.getId(), oldPassword)) {
+                    updated = adminDAO.updatePassword(admin.getId(), newPassword);
+                } else {
+                    result.put("code", 1);
+                    result.put("msg", "原密码错误");
+                    out.write(new Gson().toJson(result));
+                    return;
                 }
             } else if (user != null) {
-                // 更新用户信息
-                user.setEmail(email);
-                user.setPhone(phone);
-                updated = userDAO.updateUser(user);
-                if (updated) {
-                    request.getSession().setAttribute("loginUser", user);
+                // 验证用户原密码
+                if (userDAO.verifyPassword(user.getId(), oldPassword)) {
+                    updated = userDAO.updatePassword(user.getId(), newPassword);
+                } else {
+                    result.put("code", 1);
+                    result.put("msg", "原密码错误");
+                    out.write(new Gson().toJson(result));
+                    return;
                 }
             } else {
                 result.put("code", 1);
@@ -79,10 +66,12 @@ public class UpdateProfileServlet extends HttpServlet {
             
             if (updated) {
                 result.put("code", 0);
-                result.put("msg", "更新成功");
+                result.put("msg", "密码修改成功");
+                // 清除session
+                request.getSession().invalidate();
             } else {
                 result.put("code", 1);
-                result.put("msg", "更新失败");
+                result.put("msg", "修改失败");
             }
             
         } catch (Exception e) {
@@ -93,20 +82,4 @@ public class UpdateProfileServlet extends HttpServlet {
         
         out.write(new Gson().toJson(result));
     }
-
-    // 验证邮箱格式
-    private boolean isValidEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            return false;
-        }
-        return email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
-    }
-
-    // 验证手机号格式
-    private boolean isValidPhone(String phone) {
-        if (phone == null || phone.trim().isEmpty()) {
-            return false;
-        }
-        return phone.matches("^1[3-9]\\d{9}$");
-    }
-}
+} 
