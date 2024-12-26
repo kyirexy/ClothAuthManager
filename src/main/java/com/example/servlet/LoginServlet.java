@@ -26,6 +26,10 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
         String role = request.getParameter("role");
 
+        System.out.println(username);
+        System.out.println(password);
+        System.out.println(role);
+
         response.setContentType("application/json;charset=utf-8");
         PrintWriter out = response.getWriter();
 

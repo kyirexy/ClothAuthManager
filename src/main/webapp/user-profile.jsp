@@ -166,7 +166,7 @@
             <div class="action-buttons">
                 <button type="button" class="layui-btn" onclick="openEditProfile()">编辑资料</button>
                 <button type="button" class="layui-btn layui-btn-normal" onclick="openChangePassword()">修改密码</button>
-                <button type="button" class="layui-btn layui-btn-primary" onclick="window.location.href='<%= returnUrl %>'">返回</button>
+                <button type="button" class="layui-btn layui-btn-primary" onclick="returnToMain()">返回</button>
             </div>
         </div>
     </div>
@@ -215,21 +215,30 @@
         // 修改返回方法
         window.returnToMain = function() {
             var isAdmin = <%= isAdmin %>;
-            console.log("Is Admin:", isAdmin); // 调试信息
-            console.log("Return URL:", '<%= returnUrl %>'); // 调试信息
+            console.log("Is Admin:", isAdmin);
             
             try {
-                if (window.parent && window.parent.layer) {
-                    // 尝试关闭弹出层
-                    window.parent.layer.closeAll('iframe');
+                // 如果在iframe中
+                if (window.parent && window.parent !== window) {
+                    // 获取顶层窗口
+                    var topWindow = window.top;
+                    // 直接在顶层窗口进行跳转
+                    topWindow.location.href = '<%= returnUrl %>';
+                } else {
+                    // 如果不在iframe中，直接跳转
+                    window.location.href = '<%= returnUrl %>';
                 }
             } catch (e) {
-                console.log("Error closing layer:", e); // 调试信息
+                console.error("Return error:", e);
+                // 发生错误时直接跳转
+                window.location.href = '<%= returnUrl %>';
             }
-            
-            // 无论如何都进行跳转
-            window.location.href = '<%= returnUrl %>';
         };
+        
+        // 返回按钮点击事件
+        $(document).on('click', '.layui-btn-primary', function() {
+            returnToMain();
+        });
         
         // 打开编辑资料窗口
         window.openEditProfile = function() {
