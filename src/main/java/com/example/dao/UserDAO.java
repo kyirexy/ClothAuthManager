@@ -13,14 +13,12 @@ public class UserDAO {
     private static final String DEFAULT_AVATAR = "static/images/smail.jpg";
     
     public User login(String username, String password) {
-        String sql = "SELECT * FROM user WHERE (username = ? OR email = ? OR phone = ?) AND password = ? AND status = 'active'";
+        String sql = "SELECT * FROM user WHERE username = ? AND password = ? AND status = 'active'";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, username);
-            pstmt.setString(2, username);
-            pstmt.setString(3, username);
-            pstmt.setString(4, password);
+            pstmt.setString(2, password);
             
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -57,8 +55,11 @@ public class UserDAO {
                 
                 return user;
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return null;
     }
@@ -119,38 +120,30 @@ public class UserDAO {
     }
 
     public boolean updateUser(User user) {
-        String sql = "UPDATE user SET " +
-                    "email = ?, " +
-                    "phone = ?, " +
-                    "gender = ?, " +
-                    "full_name = ?, " +
-                    "address = ?, " +
-                    "status = ?, " +
-                    "profile_picture = ?, " +
-                    "login_type = ? " +
-                    "WHERE id = ?";
-        
+        String sql = "UPDATE user SET username = ?, email = ?, phone = ?, status = ? WHERE id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, user.getEmail());
-            pstmt.setString(2, user.getPhone());
-            pstmt.setString(3, user.getGender());
-            pstmt.setString(4, user.getFullName());
-            pstmt.setString(5, user.getAddress());
-            pstmt.setString(6, user.getStatus());
-            pstmt.setString(7, user.getProfilePicture());
+            // 打印调试信息
+            System.out.println("Executing SQL: " + sql);
+            System.out.println("User ID: " + user.getId());
             
-            // 处理枚举类型
-            User.LoginType loginType = user.getLoginType();
-            pstmt.setString(8, loginType != null ? loginType.name() : null);
+            pstmt.setString(1, user.getUsername());
+            pstmt.setString(2, user.getEmail());
+            pstmt.setString(3, user.getPhone());
+            pstmt.setString(4, user.getStatus());
+            pstmt.setInt(5, user.getId());
             
-            pstmt.setInt(9, user.getId());
+            int result = pstmt.executeUpdate();
+            System.out.println("Update result: " + result);
             
-            return pstmt.executeUpdate() > 0;
-        } catch (Exception e) {
+            return result > 0;
+        } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
             e.printStackTrace();
             return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -261,20 +254,6 @@ public class UserDAO {
         return false;
     }
 
-    public boolean deleteUser(int userId) {
-        String sql = "DELETE FROM user WHERE id = ?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, userId);
-            
-            return pstmt.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     public boolean verifyPassword(Integer userId, String password) {
         String sql = "SELECT password FROM user WHERE id = ?";
         try (Connection conn = DBUtil.getConnection();
@@ -342,6 +321,49 @@ public class UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean deleteUser(int id) {
+        String sql = "DELETE FROM user WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, id);
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public User getUserById(int id) {
+        String sql = "SELECT * FROM user WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setUsername(rs.getString("username"));
+                user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+                user.setStatus(rs.getString("status"));
+                user.setRegistrationDate(rs.getTimestamp("registration_date"));
+                return user;
+            }
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

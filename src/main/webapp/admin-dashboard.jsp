@@ -169,7 +169,6 @@
                 </a>
                 <dl class="layui-nav-child">
                     <dd><a href="javascript:;" data-url="user-profile.jsp" class="menu-item"><i class="layui-icon">&#xe614;</i> 个人信息</a></dd>
-                    <dd><a href="javascript:;" class="change-password"><i class="layui-icon">&#xe620;</i> 修改密码</a></dd>
                     <dd><a href="javascript:;" class="logout"><i class="layui-icon">&#xe682;</i> 退出登录</a></dd>
                 </dl>
             </li>

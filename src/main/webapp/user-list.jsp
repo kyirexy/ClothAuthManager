@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>用户管理</title>
-    <link rel="stylesheet" href="static/common/layui/css/layui.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/common/layui/css/layui.css">
     <style>
         .layui-table-tool-temp {
             padding-right: 0;
@@ -135,7 +135,7 @@
         {{# } }}
     </script>
 
-    <script src="static/common/layui/layui.js"></script>
+    <script src="${pageContext.request.contextPath}/static/common/layui/layui.js"></script>
     <script>
     layui.use(['table', 'form', 'layer'], function(){
         var table = layui.table,
@@ -195,25 +195,60 @@
             var data = obj.data;
             switch(obj.event){
                 case 'edit':
+                    console.log('编辑按钮被点击，用户数据：', data);  // 调试日志
                     layer.open({
                         type: 2,
                         title: '编辑用户',
                         content: 'user-edit.jsp?id=' + data.id,
                         area: ['500px', '400px'],
-                        maxmin: true
+                        maxmin: true,
+                        success: function(layero, index){
+                            console.log('弹窗打开成功');  // 调试日志
+                        }
                     });
                     break;
+                    
                 case 'del':
                     layer.confirm('确定删除该用户吗？', function(index){
-                        // 执行删除
+                        $.ajax({
+                            url: 'user/delete',
+                            type: 'POST',
+                            data: { id: data.id },
+                            success: function(res){
+                                if(res.code === 0){
+                                    layer.msg('删除成功', {icon: 1});
+                                    obj.del();
+                                } else {
+                                    layer.msg(res.msg || '删除失败', {icon: 2});
+                                }
+                            }
+                        });
                         layer.close(index);
                     });
                     break;
+                    
                 case 'disable':
                 case 'enable':
                     var action = obj.event === 'disable' ? '禁用' : '启用';
-                    layer.confirm('确定' + action + '该用户吗？', function(index){
-                        // 执行状态更新
+                    var newStatus = obj.event === 'disable' ? 'inactive' : 'active';
+                    
+                    layer.confirm('确定要' + action + '该用户吗？', function(index){
+                        $.ajax({
+                            url: 'user/status',
+                            type: 'POST',
+                            data: {
+                                id: data.id,
+                                status: newStatus
+                            },
+                            success: function(res){
+                                if(res.code === 0){
+                                    layer.msg(action + '成功', {icon: 1});
+                                    table.reload('userTable');
+                                } else {
+                                    layer.msg(res.msg || action + '失败', {icon: 2});
+                                }
+                            }
+                        });
                         layer.close(index);
                     });
                     break;

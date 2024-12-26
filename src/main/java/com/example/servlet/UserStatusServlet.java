@@ -1,16 +1,17 @@
 package com.example.servlet;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import com.example.dao.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
 
-@WebServlet("/user/delete")
-public class UserDeleteServlet extends HttpServlet {
+@WebServlet("/user/status")
+public class UserStatusServlet extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
 
     @Override
@@ -20,29 +21,25 @@ public class UserDeleteServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         
         try {
-            // 获取要删除的用户ID
             String idStr = request.getParameter("id");
-            if (idStr == null || idStr.trim().isEmpty()) {
-                out.print("{\"code\":1,\"msg\":\"用户ID不能为空\"}");
+            String status = request.getParameter("status");
+            
+            if (idStr == null || status == null) {
+                out.print("{\"code\":1,\"msg\":\"参数错误\"}");
                 return;
             }
             
             int id = Integer.parseInt(idStr);
-            
-            // 执行删除操作
-            boolean success = userDAO.deleteUser(id);
+            boolean success = userDAO.updateUserStatus(id, status);
             
             if (success) {
-                out.print("{\"code\":0,\"msg\":\"删除成功\"}");
+                out.print("{\"code\":0,\"msg\":\"状态更新成功\"}");
             } else {
-                out.print("{\"code\":1,\"msg\":\"删除失败\"}");
+                out.print("{\"code\":1,\"msg\":\"状态更新失败\"}");
             }
-            
-        } catch (NumberFormatException e) {
-            out.print("{\"code\":1,\"msg\":\"无效的用户ID\"}");
         } catch (Exception e) {
             e.printStackTrace();
-            out.print("{\"code\":1,\"msg\":\"" + e.getMessage() + "\"}");
+            out.print("{\"code\":1,\"msg\":\"服务器错误\"}");
         }
     }
 } 
