@@ -164,9 +164,9 @@
             </div>
             
             <div class="action-buttons">
-                <button type="button" class="layui-btn" onclick="openEditProfile()">编辑资料</button>
-                <button type="button" class="layui-btn layui-btn-normal" onclick="openChangePassword()">修改密码</button>
-                <button type="button" class="layui-btn layui-btn-primary" onclick="returnToMain()">返回</button>
+                <button type="button" class="layui-btn" onclick="window.openEditProfile()">编辑资料</button>
+                <button type="button" class="layui-btn layui-btn-normal" onclick="window.openChangePassword()">修改密码</button>
+                <button type="button" class="layui-btn layui-btn-primary" onclick="window.returnToMain()">返回</button>
             </div>
         </div>
     </div>
@@ -175,7 +175,8 @@
     <script>
     layui.use(['upload', 'layer'], function(){
         var upload = layui.upload,
-            layer = layui.layer;
+            layer = layui.layer,
+            $ = layui.jquery;  // 确保引入jQuery
         
         upload.render({
             elem: '#uploadAvatar'
@@ -247,7 +248,21 @@
                 title: '编辑个人资料',
                 shade: 0.6,
                 area: ['500px', '400px'],
-                content: 'edit-profile.jsp'
+                content: 'edit-profile.jsp',
+                success: function(layero, index){
+                    // 获取iframe页的窗口对象
+                    var iframeWin = window[layero.find('iframe')[0]['name']];
+                    // 向iframe页传递当前用户信息
+                    var currentData = {
+                        username: '<%= username %>',
+                        email: '<%= email %>',
+                        phone: '<%= phone %>'
+                    };
+                    // 等待iframe加载完成后设置数据
+                    setTimeout(function(){
+                        iframeWin.setFormData && iframeWin.setFormData(currentData);
+                    }, 300);
+                }
             });
         };
         

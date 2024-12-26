@@ -274,163 +274,162 @@
 
 
 <script>
-// 将所有的初始化逻辑放在一个统一的初始化函数中
-layui.use(['layer', 'form', 'element', 'jquery'], function(){
-    var layer = layui.layer,
-        form = layui.form,
-        element = layui.element,
-        $ = layui.jquery;  // 确保使用 layui 的 jQuery
+    // 将所有的初始化逻辑放在一个统一的初始化函数中
+    layui.use(['layer', 'form', 'element', 'jquery'], function(){
+        var layer = layui.layer,
+            form = layui.form,
+            element = layui.element,
+            $ = layui.jquery;  // 确保使用 layui 的 jQuery
 
-    console.log('layui 初始化完成');
+        console.log('layui 初始化完成');
 
-    // 登录按钮点击事件
-    $('#loginBtn').on('click', function(){
-        console.log('登录按钮被点击');
+        // 登录按钮点击事件
+        $('#loginBtn').on('click', function(){
+            console.log('登录按钮被点击');
 
-        // 打开弹窗
-        layer.open({
-            type: 1,
-            title: '登录/注册',
-            area: ['360px', 'auto'],
-            content: $('#sign'),
-            shadeClose: true,
-            closeBtn: 1,
-            shade: 0.3,
-            offset: '100px',
-            success: function(layero, index){
-                // 重置表单
-                $('form[lay-filter="loginForm"]')[0].reset();
-                $('form[lay-filter="registerForm"]')[0].reset();
+            // 打开弹窗
+            layer.open({
+                type: 1,
+                title: '登录/注册',
+                area: ['360px', 'auto'],
+                content: $('#sign'),
+                shadeClose: true,
+                closeBtn: 1,
+                shade: 0.3,
+                offset: '100px',
+                success: function(layero, index){
+                    // 重置表单
+                    $('form[lay-filter="loginForm"]')[0].reset();
+                    $('form[lay-filter="registerForm"]')[0].reset();
 
-                // 重新渲染表单
-                form.render();
-            }
-        });
-    });
-
-    // 监听登录提交
-    form.on('submit(login)', function(data){
-        var loadIndex = layer.load(1);
-
-        $.ajax({
-            url: 'login',
-            type: 'POST',
-            data: {
-                username: data.field.username,
-                password: data.field.password,
-                role: $('input[name="role"]:checked').val() || 'user'
-            },
-            dataType: 'json',
-            success: function(res){
-                layer.close(loadIndex);
-                if(res.code === 0){
-                    layer.msg('登录成功', {
-                        icon: 1,
-                        time: 1000
-                    }, function(){
-                        res.role === 'admin' ?
-                            window.location.href = 'admin-dashboard.jsp' :
-                            window.location.reload();
-                    });
-                } else {
-                    layer.msg(res.msg, {icon: 2});
+                    // 重新渲染表单
+                    form.render();
                 }
-            },
-            error: function(){
-                layer.close(loadIndex);
-                layer.msg('服务器错误', {icon: 2});
-            }
+            });
         });
-        return false;
-    });
 
-    // 监听注册提交
-    form.on('submit(register)', function(data){
-        console.log('注册表单提交', data.field);
+        // 监听登录提交
+        form.on('submit(login)', function(data){
+            var loadIndex = layer.load(1);
 
-        // 表单验证
-        if(!data.field.username || !data.field.password || !data.field.repassword ||
-           !data.field.email || !data.field.phone) {
-            layer.msg('请填写完整注册信息', {icon: 2});
+            $.ajax({
+                url: 'login',
+                type: 'POST',
+                data: {
+                    username: data.field.username,
+                    password: data.field.password,
+                    role: $('input[name="role"]:checked').val() || 'user'
+                },
+                dataType: 'json',
+                success: function(res){
+                    layer.close(loadIndex);
+                    if(res.code === 0){
+                        layer.msg('登录成功', {
+                            icon: 1,
+                            time: 1000
+                        }, function(){
+                            res.role === 'admin' ?
+                                window.location.href = 'admin-dashboard.jsp' :
+                                window.location.reload();
+                        });
+                    } else {
+                        layer.msg(res.msg, {icon: 2});
+                    }
+                },
+                error: function(){
+                    layer.close(loadIndex);
+                    layer.msg('服务器错误', {icon: 2});
+                }
+            });
             return false;
-        }
+        });
 
-        if(data.field.password !== data.field.repassword) {
-            layer.msg('两次密码输入不一致', {icon: 2});
-            return false;
-        }
+        // 监听注册提交
+        form.on('submit(register)', function(data){
+            console.log('注册表单提交', data.field);
 
-        var loadIndex = layer.load(1);
+            // 表单验证
+            if(!data.field.username || !data.field.password || !data.field.repassword ||
+                !data.field.email || !data.field.phone) {
+                layer.msg('请填写完整注册信息', {icon: 2});
+                return false;
+            }
 
-        $.ajax({
-            url: 'register',
-            type: 'POST',
-            data: data.field,
-            dataType: 'json',
-            success: function(res){
-                layer.close(loadIndex);
-                console.log('注册响应:', res);
+            if(data.field.password !== data.field.repassword) {
+                layer.msg('两次密码输入不一致', {icon: 2});
+                return false;
+            }
 
-                if(res.code === 0){
-                    // 注册成功后自动登录
-                    $.ajax({
-                        url: 'login',
-                        type: 'POST',
-                        data: {
-                            username: data.field.username,
-                            password: data.field.password,
-                            role: 'user'
-                        },
-                        dataType: 'json',
-                        success: function(loginRes){
-                            if(loginRes.code === 0){
-                                layer.msg('注册成功并已自动登录', {
-                                    icon: 1,
-                                    time: 1500
-                                }, function(){
-                                    window.location.reload();
-                                });
-                            } else {
+            var loadIndex = layer.load(1);
+
+            $.ajax({
+                url: 'register',
+                type: 'POST',
+                data: data.field,
+                dataType: 'json',
+                success: function(res){
+                    layer.close(loadIndex);
+                    console.log('注册响应:', res);
+
+                    if(res.code === 0){
+                        // 注册成功后自动登录
+                        $.ajax({
+                            url: 'login',
+                            type: 'POST',
+                            data: {
+                                username: data.field.username,
+                                password: data.field.password,
+                                role: 'user'
+                            },
+                            dataType: 'json',
+                            success: function(loginRes){
+                                if(loginRes.code === 0){
+                                    layer.msg('注册成功并已自动登录', {
+                                        icon: 1,
+                                        time: 1500
+                                    }, function(){
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    layer.msg('注册成功，请手动登录', {icon: 1});
+                                    element.tabChange('user-tab', 0);
+                                }
+                            },
+                            error: function(){
                                 layer.msg('注册成功，请手动登录', {icon: 1});
                                 element.tabChange('user-tab', 0);
                             }
-                        },
-                        error: function(){
-                            layer.msg('注册成功，请手动登录', {icon: 1});
-                            element.tabChange('user-tab', 0);
-                        }
-                    });
-                } else {
-                    layer.msg(res.msg || '注册失败，请重试', {icon: 2});
+                        });
+                    } else {
+                        layer.msg(res.msg || '注册失败，请重试', {icon: 2});
+                    }
+                },
+                error: function(xhr, status, error){
+                    layer.close(loadIndex);
+                    console.error('注册请求失败:', error);
+                    layer.msg('服务器错误，请稍后重试', {icon: 2});
                 }
-            },
-            error: function(xhr, status, error){
-                layer.close(loadIndex);
-                console.error('注册请求失败:', error);
-                layer.msg('服务器错误，请稍后重试', {icon: 2});
-            }
+            });
+            return false;
         });
-        return false;
-    });
 
-    // 头像菜单交互
-    $('#userAvatar').on('click', function(e){
-        e.stopPropagation();
-        console.log('头像被点击');
-        $('#userMenu').slideToggle(200);
-    });
+        // 头像菜单交互
+        $('#userAvatar').on('click', function(e){
+            e.stopPropagation();
+            console.log('头像被点击');
+            $('#userMenu').slideToggle(200);
+        });
 
-    // 点击其他区域关闭菜单
-    $(document).on('click', function(){
-        $('#userMenu').slideUp(200);
-    });
+        // 点击其他区域关闭菜单
+        $(document).on('click', function(){
+            $('#userMenu').slideUp(200);
+        });
 
-    // 防止菜单点击关闭
-    $('#userMenu').on('click', function(e){
-        e.stopPropagation();
+        // 防止菜单点击关闭
+        $('#userMenu').on('click', function(e){
+            e.stopPropagation();
+        });
     });
-});
 </script>
 </body>
 </html>
-
