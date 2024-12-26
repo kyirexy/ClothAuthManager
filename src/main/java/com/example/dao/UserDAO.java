@@ -105,9 +105,6 @@ public class UserDAO {
             pstmt.setString(1, avatarPath);
             pstmt.setInt(2, userId);
 
-            System.out.println("Executing SQL: " + sql);
-            System.out.println("Parameters: avatarPath=" + avatarPath + ", userId=" + userId);
-
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 
@@ -124,10 +121,6 @@ public class UserDAO {
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            // 打印调试信息
-            System.out.println("Executing SQL: " + sql);
-            System.out.println("User ID: " + user.getId());
-
             pstmt.setString(1, user.getUsername());
             pstmt.setString(2, user.getEmail());
             pstmt.setString(3, user.getPhone());
@@ -135,11 +128,9 @@ public class UserDAO {
             pstmt.setInt(5, user.getId());
 
             int result = pstmt.executeUpdate();
-            System.out.println("Update result: " + result);
 
             return result > 0;
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
             e.printStackTrace();
             return false;
         } catch (Exception e) {

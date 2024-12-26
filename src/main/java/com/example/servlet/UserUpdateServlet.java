@@ -33,14 +33,7 @@ public class UserUpdateServlet extends HttpServlet {
             String email = request.getParameter("email");
             String phone = request.getParameter("phone");
             String status = request.getParameter("status");
-            
-            // 打印调试信息
-            System.out.println("Updating user - ID: " + id);
-            System.out.println("Username: " + username);
-            System.out.println("Email: " + email);
-            System.out.println("Phone: " + phone);
-            System.out.println("Status: " + status);
-            
+
             // 验证数据
             if (username == null || username.trim().isEmpty() ||
                 email == null || email.trim().isEmpty() ||

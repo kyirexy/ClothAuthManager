@@ -21,7 +21,6 @@ public class FileUtil {
         
         // 获取项目的实际部署路径
         String uploadPath = servletContext.getRealPath("/static/images");
-        System.out.println("Upload path: " + uploadPath); // 调试信息
         
         // 确保上传目录存在
         File uploadDir = new File(uploadPath);
@@ -31,7 +30,6 @@ public class FileUtil {
         
         // 保存文件
         String filePath = uploadPath + File.separator + newFileName;
-        System.out.println("Saving file to: " + filePath); // 调试信息
         filePart.write(filePath);
         
         // 返回相对路径（不带前导斜杠）

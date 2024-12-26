@@ -281,7 +281,7 @@
     // 添加一个直接的返回函数
     function returnToMain() {
         var isAdmin = <%= isAdmin %>;
-        console.log("Direct return - Is Admin:", isAdmin); // 调试信息
+        console.log("Direct return - Is Admin:", isAdmin);
         window.location.href = '<%= returnUrl %>';
     }
     

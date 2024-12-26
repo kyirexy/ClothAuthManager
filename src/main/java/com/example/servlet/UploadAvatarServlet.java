@@ -48,7 +48,6 @@ public class UploadAvatarServlet extends HttpServlet {
             
             // 保存图片
             String newAvatarPath = FileUtil.saveImage(filePart);
-            System.out.println("New avatar path: " + newAvatarPath);
             
             // 更新数据库
             boolean updated = false;
@@ -57,14 +56,12 @@ public class UploadAvatarServlet extends HttpServlet {
             User loginUser = (User) session.getAttribute("loginUser");
             
             if (loginAdmin != null) {
-                System.out.println("Updating admin avatar...");
                 updated = adminDAO.updateAvatar(loginAdmin.getId(), newAvatarPath);
                 if (updated) {
                     loginAdmin.setProfilePicture(newAvatarPath);
                     session.setAttribute("loginAdmin", loginAdmin);
                 }
             } else if (loginUser != null) {
-                System.out.println("Updating user avatar...");
                 updated = userDAO.updateAvatar(loginUser.getId(), newAvatarPath);
                 if (updated) {
                     loginUser.setProfilePicture(newAvatarPath);
